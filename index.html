@@ -3,608 +3,1107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OLIVEIRA APPS | CORE ACCESS</title>
-    <!-- Importing a techy font -->
+    <title>OLIVEIRA APPS | CORE ACCESS v5.0</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         FIREBASE SDK v9 (compat) — CDN
+         ─────────────────────────────────────────────────────────────────────
+         Firebase está incluso e pronto para uso.
+         Para ativar, substitua os valores de firebaseConfig abaixo pelos
+         dados do seu projeto no Firebase Console:
+         https://console.firebase.google.com
+         ═══════════════════════════════════════════════════════════════════ -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <style>
+        /* ─── VARIABLES ─────────────────────────────────────────────────── */
         :root {
-            --matrix-green: #00ff41;
-            --matrix-dark: #003b00;
-            --bg-color: #050505;
-            --text-glow: 0 0 8px rgba(0, 255, 65, 0.7);
-            --border-glow: 0 0 15px rgba(0, 255, 65, 0.3);
-            --transition-speed: 0.3s;
+            --green:      #00ff41;
+            --green-dim:  #003b00;
+            --green-mid:  #00aa2a;
+            --green-glow: rgba(0, 255, 65, 0.6);
+            --bg:         #050505;
+            --bg-card:    rgba(0, 10, 0, 0.92);
+            --red:        #ff3e3e;
+            --blue:       #4285f4;
+            --text-glow:  0 0 8px rgba(0, 255, 65, 0.7);
+            --box-glow:   0 0 20px rgba(0, 255, 65, 0.25);
+            --speed:      0.3s;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
+        /* ─── RESET ─────────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { height: 100%; }
 
         body {
-            background: var(--bg-color);
-            color: var(--matrix-green);
-            font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-            height: 100vh;
+            background: var(--bg);
+            color: var(--green);
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
             position: relative;
         }
 
-        /* --- BACKGROUND EFFECTS --- */
+        /* ─── SCANLINE OVERLAY ──────────────────────────────────────────── */
         body::before {
             content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            position: fixed; inset: 0;
+            background:
+                linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.22) 50%),
+                linear-gradient(90deg, rgba(255,0,0,0.04), rgba(0,255,0,0.02), rgba(0,0,255,0.04));
             background-size: 100% 4px, 3px 100%;
-            z-index: 100;
+            z-index: 1000;
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.4;
         }
 
-        .scanline {
-            width: 100%;
-            height: 100px;
-            z-index: 101;
-            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 255, 65, 0.1) 50%, rgba(0, 0, 0, 0) 100%);
-            opacity: 0.1;
-            position: absolute;
-            bottom: 100%;
-            animation: scanline 6s linear infinite;
+        .scanline-bar {
+            width: 100%; height: 120px;
+            position: fixed;
+            top: -120px;
+            background: linear-gradient(0deg, transparent 0%, rgba(0,255,65,0.08) 50%, transparent 100%);
+            z-index: 999;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
         }
 
         @keyframes scanline {
-            0% { bottom: 100%; }
-            100% { bottom: -100px; }
+            0%   { top: -120px; }
+            100% { top: 100vh;  }
         }
 
+        /* ─── GRID BACKGROUND ───────────────────────────────────────────── */
         .grid-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(to right, rgba(0, 255, 65, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(to right,  rgba(0,255,65,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,255,65,0.04) 1px, transparent 1px);
             background-size: 40px 40px;
             z-index: -1;
         }
 
-        /* --- HEADER & STATUS --- */
+        /* ─── HEADER ────────────────────────────────────────────────────── */
         header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            padding: 14px 24px;
+            border-bottom: 1px solid rgba(0,255,65,0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            position: sticky; top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             letter-spacing: 4px;
             text-shadow: var(--text-glow);
         }
+        .logo span { color: var(--green-mid); }
 
-        .system-status {
+        .sys-stats {
             display: flex;
-            gap: 20px;
-            font-size: 0.75rem;
+            gap: 18px;
+            font-size: 0.7rem;
             text-transform: uppercase;
         }
 
-        .status-item {
+        .stat-item {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
 
-        .status-label {
-            color: var(--matrix-dark);
-            font-size: 0.6rem;
+        .stat-label { color: var(--green-dim); font-size: 0.58rem; }
+
+        .stat-val {
+            color: var(--green);
+            font-weight: 700;
         }
 
-        .status-value {
-            color: var(--matrix-green);
-        }
+        .stat-val.warn { color: #ffaa00; }
+        .stat-val.ok   { color: var(--green); }
 
-        /* --- MAIN CONTAINER --- */
+        /* ─── MAIN ──────────────────────────────────────────────────────── */
         main {
             flex: 1;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start;
+            padding: 30px 16px 40px;
             z-index: 10;
         }
 
+        /* ─── TERMINAL BOX ──────────────────────────────────────────────── */
         .terminal-box {
             width: 100%;
-            max-width: 500px;
-            background: rgba(0, 10, 0, 0.9);
-            border: 1px solid var(--matrix-green);
-            box-shadow: var(--border-glow);
+            max-width: 520px;
+            background: var(--bg-card);
+            border: 1px solid var(--green);
+            box-shadow: var(--box-glow), inset 0 0 30px rgba(0,255,65,0.02);
             border-radius: 4px;
-            padding: 0;
-            position: relative;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeUp 0.5s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0);    }
         }
 
         .terminal-header {
-            background: var(--matrix-green);
-            color: black;
-            padding: 5px 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
+            background: var(--green);
+            color: #000;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            letter-spacing: 1px;
         }
 
-        .terminal-controls span {
+        .term-dots span {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             border-radius: 50%;
-            background: black;
+            background: rgba(0,0,0,0.35);
             margin-left: 5px;
-            opacity: 0.3;
         }
 
-        .terminal-content {
-            padding: 30px;
-        }
+        .terminal-body { padding: 28px 28px 32px; }
 
-        /* --- TABS --- */
+        /* ─── TABS ──────────────────────────────────────────────────────── */
         .tabs {
             display: flex;
-            margin-bottom: 30px;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+            margin-bottom: 28px;
+            border-bottom: 1px solid rgba(0,255,65,0.15);
         }
 
         .tab-btn {
             flex: 1;
             background: transparent;
             border: none;
-            color: var(--matrix-dark);
+            color: var(--green-dim);
             padding: 10px;
             cursor: pointer;
             font-family: inherit;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            transition: var(--transition-speed);
+            transition: color var(--speed);
+            position: relative;
         }
 
         .tab-btn.active {
-            color: var(--matrix-green);
-            border-bottom: 2px solid var(--matrix-green);
+            color: var(--green);
             text-shadow: var(--text-glow);
         }
 
-        /* --- FORMS --- */
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px; left: 0; right: 0;
+            height: 2px;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green-glow);
+        }
+
+        /* ─── FORMS ─────────────────────────────────────────────────────── */
+        .form-section { display: none; }
+        .form-section.active { display: block; animation: fadeUp 0.3s ease-out; }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             position: relative;
         }
 
         .form-group label {
             display: block;
-            font-size: 0.7rem;
-            margin-bottom: 5px;
-            color: var(--matrix-dark);
+            font-size: 0.65rem;
+            margin-bottom: 6px;
+            color: var(--green-mid);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: rgba(0,20,0,0.6);
+            border: 1px solid var(--green-dim);
+            padding: 12px 14px;
+            color: var(--green);
+            font-family: inherit;
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color var(--speed), box-shadow var(--speed);
+            border-radius: 2px;
+        }
+
+        .form-group input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 8px rgba(0,255,65,0.3);
+        }
+
+        .form-group input.invalid {
+            border-color: var(--red) !important;
+            box-shadow: 0 0 10px rgba(255,62,62,0.45) !important;
+        }
+
+        .form-group input.valid {
+            border-color: var(--green);
+        }
+
+        .field-error {
+            font-size: 0.62rem;
+            color: var(--red);
+            margin-top: 4px;
+            display: none;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        input {
-            width: 100%;
-            background: rgba(0, 20, 0, 0.5);
-            border: 1px solid var(--matrix-dark);
-            padding: 12px;
-            color: var(--matrix-green);
-            font-family: inherit;
-            outline: none;
-            transition: var(--transition-speed);
-        }
+        .field-error.show { display: block; }
 
-        input:focus {
-            border-color: var(--matrix-green);
-            box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
-        }
-
+        /* ─── BUTTONS ───────────────────────────────────────────────────── */
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             background: transparent;
-            border: 1px solid var(--matrix-green);
-            color: var(--matrix-green);
+            border: 1px solid var(--green);
+            color: var(--green);
             font-family: inherit;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 3px;
             cursor: pointer;
-            transition: var(--transition-speed);
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background: var(--matrix-green);
-            color: black;
-            box-shadow: var(--border-glow);
-        }
-
-        .btn-google {
-            border-color: #4285f4;
-            color: #4285f4;
+            transition: background var(--speed), color var(--speed), box-shadow var(--speed);
+            margin-top: 8px;
+            border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-google:hover {
-            background: #4285f4;
-            color: white;
-            box-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
+        .btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--green);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s ease;
         }
 
-        .hidden {
-            display: none !important;
+        .btn:hover::before { transform: scaleX(1); }
+        .btn:hover { color: #000; box-shadow: 0 0 14px var(--green-glow); }
+        .btn span { position: relative; z-index: 1; }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn:disabled::before { transform: scaleX(0) !important; }
+
+        .btn-google {
+            border-color: var(--blue);
+            color: var(--blue);
+            margin-top: 16px;
         }
 
-        /* --- DASHBOARD --- */
-        .dashboard {
-            text-align: left;
+        .btn-google::before { background: var(--blue); }
+        .btn-google:hover { color: #fff; box-shadow: 0 0 14px rgba(66,133,244,0.5); }
+
+        .btn-logout {
+            border-color: var(--red);
+            color: var(--red);
+            margin-top: 8px;
         }
 
-        .user-welcome {
+        .btn-logout::before { background: var(--red); }
+        .btn-logout:hover { color: #fff; box-shadow: 0 0 14px rgba(255,62,62,0.5); }
+
+        .btn-apk {
+            border-color: #00ddff;
+            color: #00ddff;
+        }
+
+        .btn-apk::before { background: #00ddff; }
+        .btn-apk:hover { color: #000; box-shadow: 0 0 14px rgba(0,221,255,0.5); }
+
+        /* DIVIDER */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0 4px;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(0,255,65,0.15);
+        }
+        .divider span {
+            font-size: 0.62rem;
+            color: var(--green-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ─── STATUS MESSAGE ────────────────────────────────────────────── */
+        .status-msg {
+            padding: 10px 14px;
+            margin: 14px 0;
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            border-radius: 2px;
+            display: none;
+            animation: fadeUp 0.3s ease-out;
+        }
+        .status-msg.show { display: block; }
+        .status-msg.error   { border: 1px solid var(--red);  color: var(--red);  background: rgba(255,62,62,0.06); }
+        .status-msg.success { border: 1px solid var(--green); color: var(--green); background: rgba(0,255,65,0.05); }
+        .status-msg.info    { border: 1px solid #00ddff; color: #00ddff; background: rgba(0,221,255,0.05); }
+
+        /* SPINNER */
+        .spinner {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(0,255,65,0.2);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── FIREBASE NOTICE ───────────────────────────────────────────── */
+        .firebase-notice {
+            background: rgba(255, 170, 0, 0.06);
+            border: 1px solid rgba(255,170,0,0.3);
+            color: #ffaa00;
+            padding: 10px 14px;
+            font-size: 0.65rem;
             margin-bottom: 20px;
-            border-left: 3px solid var(--matrix-green);
-            padding-left: 15px;
+            letter-spacing: 0.5px;
+            line-height: 1.6;
+            border-radius: 2px;
         }
 
-        .user-welcome h2 {
-            font-size: 1.2rem;
-            margin-bottom: 5px;
+        .firebase-notice a { color: #ffc84a; }
+
+        /* ─── DASHBOARD ─────────────────────────────────────────────────── */
+        #dashboard-section { display: none; }
+        #dashboard-section.show { display: block; animation: fadeUp 0.5s ease-out; }
+
+        .success-banner {
+            border-left: 3px solid var(--green);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            background: rgba(0,255,65,0.04);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            border: 1px solid rgba(0, 255, 65, 0.1);
-            padding: 10px;
-            background: rgba(0, 255, 65, 0.05);
-        }
-
-        .stat-label {
+        .success-banner .banner-label {
             font-size: 0.6rem;
-            color: var(--matrix-dark);
+            color: var(--green-mid);
+            letter-spacing: 3px;
             text-transform: uppercase;
         }
 
-        .stat-value {
-            font-size: 0.9rem;
-            font-weight: bold;
+        .success-banner h2 {
+            font-size: 1.15rem;
+            margin-top: 6px;
+            text-shadow: var(--text-glow);
+            word-break: break-all;
         }
 
-        .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
-        .btn-logout {
-            border-color: #ff3e3e;
-            color: #ff3e3e;
-            margin-top: 20px;
+        .info-card {
+            border: 1px solid rgba(0,255,65,0.12);
+            background: rgba(0,255,65,0.03);
+            padding: 12px;
         }
 
-        .btn-logout:hover {
-            background: #ff3e3e;
-            color: white;
-            box-shadow: 0 0 10px rgba(255, 62, 62, 0.5);
+        .info-card-label {
+            font-size: 0.58rem;
+            color: var(--green-mid);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
         }
 
-        /* --- FOOTER --- */
+        .info-card-value {
+            font-size: 0.8rem;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .info-card-value.mono-sm {
+            font-size: 0.68rem;
+            opacity: 0.85;
+        }
+
+        .db-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            border-radius: 2px;
+            border: 1px solid var(--green);
+            color: var(--green);
+            margin-bottom: 20px;
+        }
+        .db-badge.pending { border-color: #ffaa00; color: #ffaa00; }
+
+        .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 5px currentColor;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+
+        .actions { display: flex; flex-direction: column; gap: 10px; }
+
+        /* ─── FOOTER ────────────────────────────────────────────────────── */
         footer {
-            padding: 15px;
+            padding: 14px;
             text-align: center;
-            font-size: 0.6rem;
-            color: var(--matrix-dark);
-            letter-spacing: 5px;
-            border-top: 1px solid rgba(0, 255, 65, 0.1);
+            font-size: 0.58rem;
+            color: var(--green-dim);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(0,255,65,0.08);
+            z-index: 10;
         }
 
-        /* Mobile Adjustments */
+        /* ─── RESPONSIVE ────────────────────────────────────────────────── */
         @media (max-width: 600px) {
-            header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .system-status {
-                width: 100%;
-                justify-content: space-around;
-            }
-            .terminal-box {
-                max-width: 100%;
-            }
+            header { padding: 12px 16px; }
+            .logo  { font-size: 1rem; }
+            .sys-stats { gap: 12px; }
+            .terminal-body { padding: 20px 18px 24px; }
+            .info-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="grid-bg"></div>
-    <div class="scanline"></div>
 
-    <header>
-        <div class="logo">OLIVEIRA_APPS</div>
-        <div class="system-status">
-            <div class="status-item">
-                <span class="status-label">Uptime</span>
-                <span id="uptime-val" class="status-value">00:00:00</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">System Load</span>
-                <span id="load-val" class="status-value">2.4%</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Network</span>
-                <span id="net-val" class="status-value">Active</span>
-            </div>
+<div class="grid-bg"></div>
+<div class="scanline-bar"></div>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header>
+    <div class="logo">OLIVEIRA<span>_</span>APPS</div>
+    <div class="sys-stats">
+        <div class="stat-item">
+            <span class="stat-label">Uptime</span>
+            <span class="stat-val ok" id="uptime">00:00:00</span>
         </div>
-    </header>
+        <div class="stat-item">
+            <span class="stat-label">CPU Load</span>
+            <span class="stat-val ok" id="cpu-load">—</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Network</span>
+            <span class="stat-val ok" id="net-status">Online</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Local Time</span>
+            <span class="stat-val" id="local-time">--:--:--</span>
+        </div>
+    </div>
+</header>
 
-    <main>
-        <div class="terminal-box">
-            <div class="terminal-header">
-                <div class="terminal-title">TERMINAL ACCESS v4.0.2</div>
-                <div class="terminal-controls">
-                    <span></span><span></span><span></span>
+<!-- ══ MAIN ════════════════════════════════════════════════════════════════ -->
+<main>
+    <div class="terminal-box">
+        <div class="terminal-header">
+            <span>TERMINAL ACCESS v5.0.0</span>
+            <div class="term-dots"><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="terminal-body">
+
+            <!-- ── AUTH SECTION ──────────────────────────────────────────── -->
+            <div id="auth-section">
+
+                <!-- Firebase Config Notice -->
+                <div class="firebase-notice" id="firebase-notice" style="display:none">
+                    ⚠ MODO LOCAL ATIVO — Firebase não configurado.<br>
+                    Para autenticação real, adicione sua config em <strong>firebaseConfig</strong> (linha ~350 do HTML).<br>
+                    Instruções: <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a>
+                    → Projeto → Configurações do projeto → Seus apps → Web.
                 </div>
-            </div>
-            
-            <div class="terminal-content">
-                <!-- AUTH SECTION -->
-                <div id="auth-section">
-                    <div class="tabs">
-                        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
-                        <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Register</button>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" id="tab-login"    onclick="switchTab('login')">Login</button>
+                    <button class="tab-btn"        id="tab-register" onclick="switchTab('register')">Registrar</button>
+                </div>
+
+                <!-- STATUS MESSAGE -->
+                <div class="status-msg" id="status-msg"></div>
+
+                <!-- ── LOGIN FORM ─────────────────────────────────────── -->
+                <div class="form-section active" id="form-login">
+
+                    <div class="form-group">
+                        <label>Identificador do Operador</label>
+                        <input type="email" id="login-email" placeholder="email@dominio.com" autocomplete="email">
+                        <div class="field-error" id="err-login-email">Email inválido</div>
                     </div>
 
-                    <form id="auth-form" onsubmit="handleAuth(event)">
-                        <div class="form-group">
-                            <label>Operator Identifier</label>
-                            <input type="email" id="email" placeholder="email@domain.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Access Key</label>
-                            <input type="password" id="password" placeholder="••••••••" required>
-                        </div>
-                        <button type="submit" class="btn" id="submit-btn">Initialize Connection</button>
-                    </form>
+                    <div class="form-group">
+                        <label>Chave de Acesso</label>
+                        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+                        <div class="field-error" id="err-login-pass">Mínimo 6 caracteres</div>
+                    </div>
 
-                    <button class="btn btn-google" onclick="googleSignIn()">
-                        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="currentColor" d="M17.64 8.29c.12.47.18.96.18 1.46 0 2.21-.79 4.09-2.16 5.43l-2.61-2.03c.69-.47 1.17-1.25 1.17-2.15 0-.25-.03-.49-.08-.73h-5.11v-1.98h7.61zm-7.61 5.92c-1.89 0-3.5-1.28-4.08-3.03l-2.69 2.08c1.32 2.61 4.03 4.41 7.18 4.41 1.99 0 3.8-.73 5.17-1.95l-2.6-2.02c-.75.52-1.7.83-2.98.83zm-7.61-7.85l2.69 2.08c.58-1.75 2.19-3.03 4.08-3.03 1.25 0 2.38.43 3.27 1.15l1.83-1.83C13.2 2.91 11.66 2.19 10.03 2.19c-3.15 0-5.86 1.8-7.18 4.41z"/></svg>
-                        Google Auth Bridge
+                    <button class="btn" id="btn-login" onclick="handleLogin()">
+                        <span id="btn-login-text">⚡ Inicializar Conexão</span>
+                    </button>
+
+                    <div class="divider"><span>ou</span></div>
+
+                    <button class="btn btn-google" id="btn-google-login" onclick="googleSignIn()">
+                        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="currentColor" d="M17.64 9.2c.12.47.18.96.18 1.46 0 2.21-.79 4.09-2.16 5.43l-2.61-2.03c.69-.47 1.17-1.25 1.17-2.15 0-.25-.03-.49-.08-.73H9.03V9.2h8.61zm-7.61 5.92c-1.89 0-3.5-1.28-4.08-3.03L3.26 14.17c1.32 2.61 4.03 4.41 7.18 4.41 1.99 0 3.8-.73 5.17-1.95l-2.6-2.02c-.75.52-1.7.83-2.98.83zm-7.61-7.85l2.69 2.08C5.69 7.6 7.3 6.32 9.19 6.32c1.25 0 2.38.43 3.27 1.15l1.83-1.83C13.2 3.91 11.66 3.19 10.03 3.19c-3.15 0-5.86 1.8-7.18 4.41z"/></svg>
+                        <span>Google Auth Bridge</span>
+                    </button>
+
+                </div>
+
+                <!-- ── REGISTER FORM ──────────────────────────────────── -->
+                <div class="form-section" id="form-register">
+
+                    <div class="form-group">
+                        <label>Nome do Operador</label>
+                        <input type="text" id="reg-name" placeholder="Seu nome" autocomplete="name">
+                        <div class="field-error" id="err-reg-name">Campo obrigatório</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="reg-email" placeholder="email@dominio.com" autocomplete="email">
+                        <div class="field-error" id="err-reg-email">Email inválido</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senha (mín. 6 caracteres)</label>
+                        <input type="password" id="reg-pass" placeholder="••••••••" autocomplete="new-password">
+                        <div class="field-error" id="err-reg-pass">Mínimo 6 caracteres</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirmar Senha</label>
+                        <input type="password" id="reg-pass2" placeholder="••••••••" autocomplete="new-password">
+                        <div class="field-error" id="err-reg-pass2">Senhas não coincidem</div>
+                    </div>
+
+                    <button class="btn" id="btn-register" onclick="handleRegister()">
+                        <span id="btn-register-text">🚀 Registrar Operador</span>
+                    </button>
+
+                    <div class="divider"><span>ou</span></div>
+
+                    <button class="btn btn-google" id="btn-google-reg" onclick="googleSignIn()">
+                        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="currentColor" d="M17.64 9.2c.12.47.18.96.18 1.46 0 2.21-.79 4.09-2.16 5.43l-2.61-2.03c.69-.47 1.17-1.25 1.17-2.15 0-.25-.03-.49-.08-.73H9.03V9.2h8.61zm-7.61 5.92c-1.89 0-3.5-1.28-4.08-3.03L3.26 14.17c1.32 2.61 4.03 4.41 7.18 4.41 1.99 0 3.8-.73 5.17-1.95l-2.6-2.02c-.75.52-1.7.83-2.98.83zm-7.61-7.85l2.69 2.08C5.69 7.6 7.3 6.32 9.19 6.32c1.25 0 2.38.43 3.27 1.15l1.83-1.83C13.2 3.91 11.66 3.19 10.03 3.19c-3.15 0-5.86 1.8-7.18 4.41z"/></svg>
+                        <span>Google Auth Bridge</span>
+                    </button>
+
+                </div>
+            </div><!-- /auth-section -->
+
+            <!-- ── DASHBOARD SECTION ─────────────────────────────────────── -->
+            <div id="dashboard-section">
+
+                <!-- Success banner -->
+                <div class="success-banner">
+                    <div class="banner-label">Sistema Liberado ✓</div>
+                    <h2 id="dash-email">OPERATOR@SYSTEM</h2>
+                </div>
+
+                <!-- DB badge -->
+                <div class="db-badge" id="db-badge">
+                    <div class="dot"></div>
+                    <span id="db-badge-text">Firestore: Sincronizado</span>
+                </div>
+
+                <!-- Info grid -->
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-card-label">UID</div>
+                        <div class="info-card-value mono-sm" id="dash-uid">—</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-label">Nível de Acesso</div>
+                        <div class="info-card-value">Core Level 7</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-label">Registro</div>
+                        <div class="info-card-value mono-sm" id="dash-created">—</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-label">Sessão</div>
+                        <div class="info-card-value mono-sm" id="dash-session">—</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="actions">
+                    <button class="btn btn-apk" onclick="downloadAPK()">
+                        <span>⬇ Nucleus: Download APK</span>
+                    </button>
+                    <button class="btn btn-logout" onclick="signOut()">
+                        <span>⏻ Encerrar Sessão</span>
                     </button>
                 </div>
-
-                <!-- DASHBOARD SECTION -->
-                <div id="dashboard-section" class="hidden">
-                    <div class="dashboard">
-                        <div class="user-welcome">
-                            <span class="status-label">Authorized Operator</span>
-                            <h2 id="display-email">OPERATOR@SYSTEM</h2>
-                        </div>
-
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-label">Access Level</div>
-                                <div class="stat-value">Core Level 7</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Session ID</div>
-                                <div class="stat-value" id="session-id">8F-9A-C1</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Packets Sync</div>
-                                <div class="stat-value">99.8%</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Local Time</div>
-                                <div class="stat-value" id="local-time">--:--</div>
-                            </div>
-                        </div>
-
-                        <div class="actions">
-                            <button class="btn" onclick="downloadAPK()">Nucleus: Download APK</button>
-                            <button class="btn btn-logout" onclick="signOut()">Terminate Session</button>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </div>
-    </main>
 
-    <footer>
-        OLIVEIRA APPS CORE INTERFACE // SINCERIDADE ABSOLUTA // EST. 2026
-    </footer>
+        </div><!-- /terminal-body -->
+    </div><!-- /terminal-box -->
+</main>
 
-    <script>
-        /**
-         * FIREBASE CONFIGURATION (Placeholder)
-         * Drop your Firebase keys here later.
-         */
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "oliveira-apps.firebaseapp.com",
-            projectId: "oliveira-apps",
-            storageBucket: "oliveira-apps.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer>
+    OLIVEIRA APPS CORE INTERFACE &nbsp;//&nbsp; SINCERIDADE ABSOLUTA &nbsp;//&nbsp; EST. 2026
+</footer>
 
-        // --- STATE MANAGEMENT ---
-        let currentMode = 'login';
-        const STORAGE_KEY = 'oliveira_portal_session';
-        const USERS_KEY = 'oliveira_portal_users';
+<!-- ══════════════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   ╔═══════════════════════════════════════════════════════════════════════╗
+   ║  FIREBASE CONFIG — SUBSTITUA PELOS DADOS DO SEU PROJETO              ║
+   ║  1. Acesse: https://console.firebase.google.com                      ║
+   ║  2. Selecione (ou crie) seu projeto                                  ║
+   ║  3. Clique na engrenagem → Configurações do projeto                  ║
+   ║  4. Em "Seus apps", clique no ícone Web (</>)                        ║
+   ║  5. Copie o objeto firebaseConfig e cole abaixo                      ║
+   ║  6. Em Authentication → Sign-in method: ative Email/Senha e Google  ║
+   ║  7. Em Firestore Database: crie o banco e configure as regras        ║
+   ╚═══════════════════════════════════════════════════════════════════════╝
+   ═════════════════════════════════════════════════════════════════════════ */
 
-        // --- UI ELEMENTS ---
-        const authSection = document.getElementById('auth-section');
-        const dashboardSection = document.getElementById('dashboard-section');
-        const authForm = document.getElementById('auth-form');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const submitBtn = document.getElementById('submit-btn');
-        const displayEmail = document.getElementById('display-email');
-        const localTimeEl = document.getElementById('local-time');
-        const uptimeEl = document.getElementById('uptime-val');
-        const sessionIdEl = document.getElementById('session-id');
+const FIREBASE_CONFIG = {
+    apiKey:            "YOUR_API_KEY",
+    authDomain:        "YOUR_PROJECT.firebaseapp.com",
+    projectId:         "YOUR_PROJECT_ID",
+    storageBucket:     "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID"
+};
 
-        // --- INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            checkSession();
-            startSystemMonitors();
-        });
+/* ─── Detect if Firebase config is real ─────────────────────────────────── */
+const FIREBASE_READY = !FIREBASE_CONFIG.apiKey.startsWith("YOUR_");
 
-        function switchTab(mode) {
-            currentMode = mode;
-            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-            document.getElementById('tab-register').classList.toggle('active', mode === 'register');
-            submitBtn.innerText = mode === 'login' ? 'Initialize Connection' : 'Register Operator';
+/* ─── Firebase instances ────────────────────────────────────────────────── */
+let fbAuth = null;
+let fbDb   = null;
+
+if (FIREBASE_READY) {
+    try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        fbAuth = firebase.auth();
+        fbDb   = firebase.firestore();
+    } catch (e) {
+        console.error("Firebase init error:", e);
+    }
+} else {
+    document.getElementById('firebase-notice').style.display = 'block';
+}
+
+/* ─── LocalStorage keys (fallback mode) ─────────────────────────────────── */
+const LS_SESSION = 'oliveira_session_v5';
+const LS_USERS   = 'oliveira_users_v5';
+
+/* ─── Uptime start ───────────────────────────────────────────────────────── */
+const _START = Date.now();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SYSTEM MONITORS
+   ════════════════════════════════════════════════════════════════════════ */
+function startMonitors() {
+    // Clock
+    setInterval(() => {
+        document.getElementById('local-time').textContent =
+            new Date().toLocaleTimeString('pt-BR', { hour12: false });
+    }, 1000);
+
+    // Uptime
+    setInterval(() => {
+        const delta = Math.floor((Date.now() - _START) / 1000);
+        const h = String(Math.floor(delta / 3600)).padStart(2,'0');
+        const m = String(Math.floor((delta % 3600) / 60)).padStart(2,'0');
+        const s = String(delta % 60).padStart(2,'0');
+        document.getElementById('uptime').textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    // CPU (simulated — no real browser API)
+    function updateCPU() {
+        const v = (Math.random() * 6 + 1).toFixed(1) + '%';
+        const el = document.getElementById('cpu-load');
+        el.textContent = v;
+        el.className = 'stat-val ' + (parseFloat(v) > 5 ? 'warn' : 'ok');
+    }
+    updateCPU();
+    setInterval(updateCPU, 3500);
+
+    // Network
+    function updateNet() {
+        const online = navigator.onLine;
+        const el = document.getElementById('net-status');
+        el.textContent = online ? 'Online' : 'Offline';
+        el.className   = 'stat-val ' + (online ? 'ok' : 'warn');
+    }
+    updateNet();
+    window.addEventListener('online',  updateNet);
+    window.addEventListener('offline', updateNet);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   AUTH STATE LISTENER (Firebase)
+   ════════════════════════════════════════════════════════════════════════ */
+if (FIREBASE_READY && fbAuth) {
+    fbAuth.onAuthStateChanged(async user => {
+        if (user) {
+            await writeOperatorToFirestore(user);
+            showDashboard({
+                email: user.email || user.displayName || 'operator',
+                uid:   user.uid,
+                source: user.providerData[0]?.providerId || 'firebase'
+            });
+        } else {
+            showAuth();
         }
+    });
+} else {
+    // Fallback: check localStorage session
+    const sess = getLocalSession();
+    if (sess) showDashboard(sess);
+    else       showAuth();
+}
 
-        // --- AUTH LOGIC ---
-        function handleAuth(e) {
-            e.preventDefault();
-            const email = emailInput.value;
-            const password = passwordInput.value;
-
-            if (currentMode === 'login') {
-                signIn(email, password);
-            } else {
-                signUp(email, password);
-            }
+/* ════════════════════════════════════════════════════════════════════════════
+   FIRESTORE WRITER
+   ════════════════════════════════════════════════════════════════════════ */
+async function writeOperatorToFirestore(user) {
+    if (!fbDb) return;
+    try {
+        const ref = fbDb.collection('operadores').doc(user.uid);
+        const snap = await ref.get();
+        if (!snap.exists) {
+            await ref.set({
+                email:     user.email,
+                uid:       user.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                source:    user.providerData[0]?.providerId || 'email'
+            });
         }
+        updateDbBadge(true);
+    } catch (err) {
+        console.error('Firestore write error:', err);
+        updateDbBadge(false);
+    }
+}
 
-        function signUp(email, password) {
-            let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-            if (users.find(u => u.email === email)) {
-                alert('CRITICAL ERROR: Operator ID already registered.');
-                return;
-            }
+function updateDbBadge(success) {
+    const badge = document.getElementById('db-badge');
+    const text  = document.getElementById('db-badge-text');
+    if (success) {
+        badge.className = 'db-badge';
+        text.textContent = 'Firestore: Sincronizado ✓';
+    } else {
+        badge.className = 'db-badge pending';
+        text.textContent = 'Firestore: Erro ao salvar';
+    }
+}
 
-            const newUser = {
-                email,
-                hash: btoa(password), // Temporary local hash
-                createdAt: new Date().toISOString()
-            };
+/* ════════════════════════════════════════════════════════════════════════════
+   TABS
+   ════════════════════════════════════════════════════════════════════════ */
+function switchTab(mode) {
+    document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+    document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+    document.getElementById('form-login').classList.toggle('active', mode === 'login');
+    document.getElementById('form-register').classList.toggle('active', mode === 'register');
+    clearStatus();
+}
 
-            users.push(newUser);
-            localStorage.setItem(USERS_KEY, JSON.stringify(users));
-            alert('REGISTRATION SUCCESSFUL. Access granted for initial login.');
-            switchTab('login');
+/* ════════════════════════════════════════════════════════════════════════════
+   STATUS MESSAGE
+   ════════════════════════════════════════════════════════════════════════ */
+function setStatus(msg, type = 'info') {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = 'status-msg show ' + type;
+}
+function clearStatus() {
+    const el = document.getElementById('status-msg');
+    el.className = 'status-msg';
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   VALIDATION HELPERS
+   ════════════════════════════════════════════════════════════════════════ */
+function validate(input, errId, condition) {
+    const ok = condition(input.value);
+    input.classList.toggle('valid',   ok);
+    input.classList.toggle('invalid', !ok);
+    const errEl = document.getElementById(errId);
+    if (errEl) errEl.classList.toggle('show', !ok);
+    return ok;
+}
+
+// Real-time validation wiring
+window.addEventListener('DOMContentLoaded', () => {
+    startMonitors();
+
+    const loginEmail = document.getElementById('login-email');
+    const loginPass  = document.getElementById('login-pass');
+    const regName    = document.getElementById('reg-name');
+    const regEmail   = document.getElementById('reg-email');
+    const regPass    = document.getElementById('reg-pass');
+    const regPass2   = document.getElementById('reg-pass2');
+
+    loginEmail.addEventListener('blur', () => validate(loginEmail, 'err-login-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)));
+    loginPass.addEventListener('blur',  () => validate(loginPass,  'err-login-pass',  v => v.length >= 6));
+
+    regName.addEventListener('blur',    () => validate(regName,  'err-reg-name',  v => v.trim().length > 0));
+    regEmail.addEventListener('blur',   () => validate(regEmail, 'err-reg-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)));
+    regPass.addEventListener('blur',    () => validate(regPass,  'err-reg-pass',  v => v.length >= 6));
+    regPass2.addEventListener('blur',   () => validate(regPass2, 'err-reg-pass2', v => v === regPass.value));
+
+    // Enter key support
+    loginPass.addEventListener('keydown',  e => { if (e.key === 'Enter') handleLogin(); });
+    loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+    regPass2.addEventListener('keydown',   e => { if (e.key === 'Enter') handleRegister(); });
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LOADING STATE
+   ════════════════════════════════════════════════════════════════════════ */
+function setLoading(btnId, textId, loading, defaultText) {
+    const btn = document.getElementById(btnId);
+    const txt = document.getElementById(textId);
+    btn.disabled = loading;
+    txt.innerHTML = loading
+        ? `<span class="spinner"></span>&nbsp;Aguarde...`
+        : defaultText;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LOGIN
+   ════════════════════════════════════════════════════════════════════════ */
+async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+
+    const v1 = validate(document.getElementById('login-email'), 'err-login-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    const v2 = validate(document.getElementById('login-pass'),  'err-login-pass',  v => v.length >= 6);
+    if (!v1 || !v2) { setStatus('⚠ Corrija os campos em vermelho.', 'error'); return; }
+
+    clearStatus();
+    setLoading('btn-login', 'btn-login-text', true, '⚡ Inicializar Conexão');
+
+    if (FIREBASE_READY && fbAuth) {
+        try {
+            await fbAuth.signInWithEmailAndPassword(email, pass);
+            // onAuthStateChanged will handle the rest
+        } catch (err) {
+            setLoading('btn-login', 'btn-login-text', false, '⚡ Inicializar Conexão');
+            setStatus(translateFirebaseError(err.code), 'error');
         }
-
-        function signIn(email, password) {
-            let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-            const user = users.find(u => u.email === email && u.hash === btoa(password));
-
-            if (user) {
-                establishSession(user.email);
-            } else {
-                alert('ACCESS DENIED: Invalid Operator Key.');
-            }
+    } else {
+        // LocalStorage fallback
+        await sleep(600);
+        const users = getLocalUsers();
+        const user  = users.find(u => u.email === email && u.hash === btoa(pass));
+        setLoading('btn-login', 'btn-login-text', false, '⚡ Inicializar Conexão');
+        if (user) {
+            saveLocalSession({ email: user.email, uid: user.uid, source: 'local', createdAt: user.createdAt });
+            showDashboard({ email: user.email, uid: user.uid, source: 'local', createdAt: user.createdAt });
+        } else {
+            setStatus('ACESSO NEGADO: Email ou senha inválidos.', 'error');
         }
+    }
+}
 
-        function googleSignIn() {
-            alert('REDIRECTING TO GOOGLE AUTH BRIDGE...');
-            // Simulating Google login
-            setTimeout(() => {
-                establishSession('google_operator@oliveira.sys');
-            }, 1000);
+/* ════════════════════════════════════════════════════════════════════════════
+   REGISTER
+   ════════════════════════════════════════════════════════════════════════ */
+async function handleRegister() {
+    const name   = document.getElementById('reg-name').value.trim();
+    const email  = document.getElementById('reg-email').value.trim();
+    const pass   = document.getElementById('reg-pass').value;
+    const pass2  = document.getElementById('reg-pass2').value;
+
+    const v1 = validate(document.getElementById('reg-name'),  'err-reg-name',  v => v.trim().length > 0);
+    const v2 = validate(document.getElementById('reg-email'), 'err-reg-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    const v3 = validate(document.getElementById('reg-pass'),  'err-reg-pass',  v => v.length >= 6);
+    const v4 = validate(document.getElementById('reg-pass2'), 'err-reg-pass2', v => v === pass);
+    if (!v1 || !v2 || !v3 || !v4) { setStatus('⚠ Corrija os campos em vermelho.', 'error'); return; }
+
+    clearStatus();
+    setLoading('btn-register', 'btn-register-text', true, '🚀 Registrar Operador');
+
+    if (FIREBASE_READY && fbAuth) {
+        try {
+            const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
+            await cred.user.updateProfile({ displayName: name });
+            // onAuthStateChanged handles navigation
+        } catch (err) {
+            setLoading('btn-register', 'btn-register-text', false, '🚀 Registrar Operador');
+            setStatus(translateFirebaseError(err.code), 'error');
         }
-
-        function establishSession(email) {
-            const session = {
-                email,
-                token: Math.random().toString(36).substring(7),
-                startTime: new Date().getTime()
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-            checkSession();
+    } else {
+        // LocalStorage fallback
+        await sleep(600);
+        const users = getLocalUsers();
+        if (users.find(u => u.email === email)) {
+            setLoading('btn-register', 'btn-register-text', false, '🚀 Registrar Operador');
+            setStatus('ERRO: Email já registrado no sistema.', 'error');
+            return;
         }
+        const uid = 'LOCAL-' + Math.random().toString(36).substr(2,9).toUpperCase();
+        const now = new Date().toISOString();
+        users.push({ email, hash: btoa(pass), uid, name, createdAt: now });
+        localStorage.setItem(LS_USERS, JSON.stringify(users));
+        setLoading('btn-register', 'btn-register-text', false, '🚀 Registrar Operador');
+        setStatus('✓ Operador registrado! Faça login para continuar.', 'success');
+        setTimeout(() => switchTab('login'), 1800);
+    }
+}
 
-        function checkSession() {
-            const sessionData = localStorage.getItem(STORAGE_KEY);
-            if (sessionData) {
-                const session = JSON.parse(sessionData);
-                authSection.classList.add('hidden');
-                dashboardSection.classList.remove('hidden');
-                displayEmail.innerText = session.email.toUpperCase();
-                sessionIdEl.innerText = session.token.toUpperCase() + '-' + (Math.floor(Math.random() * 90) + 10);
-            } else {
-                authSection.classList.remove('hidden');
-                dashboardSection.classList.add('hidden');
-            }
+/* ════════════════════════════════════════════════════════════════════════════
+   GOOGLE SIGN-IN
+   ════════════════════════════════════════════════════════════════════════ */
+async function googleSignIn() {
+    if (!FIREBASE_READY || !fbAuth) {
+        setStatus('⚙ Google Auth requer Firebase configurado. Ver aviso acima.', 'info');
+        return;
+    }
+    clearStatus();
+    try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        await fbAuth.signInWithPopup(provider);
+        // onAuthStateChanged handles navigation
+    } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+            setStatus(translateFirebaseError(err.code), 'error');
         }
+    }
+}
 
-        function signOut() {
-            localStorage.removeItem(STORAGE_KEY);
-            checkSession();
-        }
+/* ════════════════════════════════════════════════════════════════════════════
+   SIGN OUT
+   ════════════════════════════════════════════════════════════════════════ */
+async function signOut() {
+    if (FIREBASE_READY && fbAuth) {
+        await fbAuth.signOut();
+    } else {
+        localStorage.removeItem(LS_SESSION);
+        showAuth();
+    }
+}
 
-        // --- UTILS ---
-        function downloadAPK() {
-            window.open('https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest', '_blank');
-        }
+/* ════════════════════════════════════════════════════════════════════════════
+   SHOW / HIDE PANELS
+   ════════════════════════════════════════════════════════════════════════ */
+function showDashboard(user) {
+    document.getElementById('auth-section').style.display = 'none';
+    const dash = document.getElementById('dashboard-section');
+    dash.className = 'show';
 
-        // --- SYSTEM MONITORS (FAKES) ---
-        function startSystemMonitors() {
-            // Clock
-            setInterval(() => {
-                const now = new Date();
-                localTimeEl.innerText = now.toLocaleTimeString('pt-BR', { hour12: false });
-            }, 1000);
+    document.getElementById('dash-email').textContent   = (user.email || 'operator').toUpperCase();
+    document.getElementById('dash-uid').textContent     = user.uid || '—';
+    document.getElementById('dash-session').textContent = generateSessionId();
 
-            // Uptime counter
-            let start = Date.now();
-            setInterval(() => {
-                let delta = Math.floor((Date.now() - start) / 1000);
-                let h = Math.floor(delta / 3600).toString().padStart(2, '0');
-                let m = Math.floor((delta % 3600) / 60).toString().padStart(2, '0');
-                let s = (delta % 60).toString().padStart(2, '0');
-                uptimeEl.innerText = `${h}:${m}:${s}`;
-            }, 1000);
+    const created = user.createdAt
+        ? (typeof user.createdAt.toDate === 'function'
+            ? user.createdAt.toDate().toLocaleDateString('pt-BR')
+            : new Date(user.createdAt).toLocaleDateString('pt-BR'))
+        : new Date().toLocaleDateString('pt-BR');
+    document.getElementById('dash-created').textContent = created;
 
-            // CPU Load jitter
-            setInterval(() => {
-                let load = (Math.random() * 5 + 1).toFixed(1);
-                document.getElementById('load-val').innerText = load + '%';
-            }, 3000);
-        }
-    </script>
+    // If local mode, reflect badge
+    if (!FIREBASE_READY) {
+        document.getElementById('db-badge').className = 'db-badge pending';
+        document.getElementById('db-badge-text').textContent = 'Firestore: Config pendente';
+    }
+}
+
+function showAuth() {
+    document.getElementById('auth-section').style.display = 'block';
+    const dash = document.getElementById('dashboard-section');
+    dash.className = '';
+    switchTab('login');
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LOCALSTORAGE HELPERS
+   ════════════════════════════════════════════════════════════════════════ */
+function getLocalUsers() { return JSON.parse(localStorage.getItem(LS_USERS) || '[]'); }
+function getLocalSession() { return JSON.parse(localStorage.getItem(LS_SESSION) || 'null'); }
+function saveLocalSession(data) { localStorage.setItem(LS_SESSION, JSON.stringify(data)); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   UTILITIES
+   ════════════════════════════════════════════════════════════════════════ */
+function generateSessionId() {
+    return Math.random().toString(36).substr(2, 4).toUpperCase() + '-' +
+           Math.random().toString(36).substr(2, 4).toUpperCase();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function translateFirebaseError(code) {
+    const map = {
+        'auth/user-not-found':        'ACESSO NEGADO: Usuário não encontrado.',
+        'auth/wrong-password':        'ACESSO NEGADO: Senha incorreta.',
+        'auth/invalid-email':         'ERRO: Email inválido.',
+        'auth/email-already-in-use':  'ERRO: Email já cadastrado.',
+        'auth/weak-password':         'ERRO: Senha muito fraca (mín. 6 chars).',
+        'auth/too-many-requests':     'BLOQUEADO: Muitas tentativas. Aguarde.',
+        'auth/network-request-failed':'ERRO DE REDE: Sem conexão.',
+        'auth/popup-blocked':         'POPUP BLOQUEADO: Permita popups neste site.',
+        'auth/invalid-credential':    'ACESSO NEGADO: Credenciais inválidas.',
+    };
+    return map[code] || `ERRO DO SISTEMA: ${code}`;
+}
+
+function downloadAPK() {
+    window.open('https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest', '_blank');
+}
+</script>
+
 </body>
 </html>
