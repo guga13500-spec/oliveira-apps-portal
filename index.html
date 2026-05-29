@@ -2,89 +2,267 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oliveira Apps | Portal Oficial</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #0a0a0a; color: #00ff00; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 50px; }
-        .card { border: 2px solid #00ff00; padding: 30px; margin: 20px auto; max-width: 450px; background: #111; box-shadow: 0 0 15px rgba(0, 255, 0, 0.2); border-radius: 8px; }
-        h1 { letter-spacing: 5px; text-shadow: 2px 2px #000; }
-        button { background: #0f0; color: #000; border: none; padding: 12px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
-        button:hover { background: #0c0; transform: scale(1.02); }
-        input { width: calc(100% - 24px); padding: 12px; margin: 10px 0; background: #1a1a1a; color: #0f0; border: 1px solid #00ff00; border-radius: 4px; }
-        #auth-status { margin-bottom: 20px; font-weight: bold; font-size: 1.1em; }
-        .footer { margin-top: 40px; font-size: 0.8em; color: #008800; }
+        body { 
+            background: #0a0a0a; 
+            color: #00ff00; 
+            font-family: 'Courier New', Courier, monospace; 
+            text-align: center; 
+            padding: 50px 20px; 
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .card { 
+            border: 2px solid #00ff00; 
+            padding: 30px; 
+            margin: 20px auto; 
+            max-width: 450px; 
+            background: #111; 
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); 
+            border-radius: 8px; 
+        }
+        h1 { 
+            letter-spacing: 5px; 
+            text-shadow: 2px 2px #000; 
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h3 {
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        button { 
+            background: #0f0; 
+            color: #000; 
+            border: none; 
+            padding: 12px; 
+            width: 100%; 
+            margin-top: 15px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            transition: 0.3s; 
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 4px;
+        }
+        button:hover { 
+            background: #0c0; 
+            transform: scale(1.02); 
+            box-shadow: 0 0 10px #0f0;
+        }
+        input { 
+            width: calc(100% - 24px); 
+            padding: 12px; 
+            margin: 10px 0; 
+            background: #1a1a1a; 
+            color: #0f0; 
+            border: 1px solid #00ff00; 
+            border-radius: 4px; 
+            outline: none;
+        }
+        input::placeholder {
+            color: #006600;
+        }
+        #auth-status { 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+            font-size: 1.1em; 
+            color: #00ff00;
+            text-transform: uppercase;
+        }
+        .footer { 
+            margin-top: 40px; 
+            font-size: 0.8em; 
+            color: #008800; 
+            letter-spacing: 2px;
+        }
+        .btn-secondary {
+            background: #222; 
+            color: #0f0; 
+            border: 1px solid #0f0;
+        }
+        .btn-google {
+            background: #4285f4; 
+            color: #fff; 
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-google:hover {
+            background: #357ae8;
+            box-shadow: 0 0 10px #4285f4;
+        }
+        .btn-danger {
+            background: #aa0000; 
+            color: #fff; 
+            margin-top: 30px;
+        }
+        .btn-danger:hover {
+            background: #880000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <h1>OLIVEIRA APPS</h1>
-    <div id="auth-status">Verificando sistema...</div>
+    <div id="auth-status">INICIALIZANDO...</div>
     
-    <div id="login-form" class="card" style="display:none">
-        <h3>ACESSO RESTRITO</h3>
+    <!-- Tela de Login/Cadastro -->
+    <div id="auth-container" class="card hidden">
+        <h3 id="form-title">ACESSO RESTRITO</h3>
+        
         <input type="email" id="email" placeholder="EMAIL DO OPERADOR">
-        <input type="password" id="password" placeholder="CHAVE DE ACESSO">
-        <button onclick="signIn()">LOGAR</button>
-        <button onclick="signUp()" style="background:#222; color:#0f0; border:1px solid #0f=;">CADASTRAR</button>
-        <button onclick="loginWithGoogle()" style="background:#4285f4; color:#fff; border:none;">GOOGLE AUTH</button>
+        <input type="password" id="password" placeholder="CHAVE DE ACESSO (MIN 8 CHARS)">
+        
+        <button id="btn-login" onclick="signIn()">LOGAR NO SISTEMA</button>
+        <button id="btn-signup" class="btn-secondary" onclick="signUp()">CRIAR NOVO ACESSO</button>
+        
+        <div style="margin: 20px 0; border-top: 1px solid #333;"></div>
+        
+        <button class="btn-google" onclick="googleSignIn()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="currentColor" d="M17.64 8.29c.12.47.18.96.18 1.46 0 2.21-.79 4.09-2.16 5.43l-2.61-2.03c.69-.47 1.17-1.25 1.17-2.15 0-.25-.03-.49-.08-.73h-5.11v-1.98h7.61zm-7.61 5.92c-1.89 0-3.5-1.28-4.08-3.03l-2.69 2.08c1.32 2.61 4.03 4.41 7.18 4.41 1.99 0 3.8-.73 5.17-1.95l-2.6-2.02c-.75.52-1.7.83-2.98.83zm-7.61-7.85l2.69 2.08c.58-1.75 2.19-3.03 4.08-3.03 1.25 0 2.38.43 3.27 1.15l1.83-1.83C13.2 2.91 11.66 2.19 10.03 2.19c-3.15 0-5.86 1.8-7.18 4.41z"/></svg>
+            GOOGLE AUTH
+        </button>
     </div>
 
-    <div id="content" class="card" style="display:none">
+    <!-- Tela do Sistema Liberado -->
+    <div id="content-container" class="card hidden">
         <h3>SISTEMA LIBERADO</h3>
         <p>Acesso ao núcleo de produção confirmado.</p>
-        <button onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR GRAVADOR SUPER V2 (APK)</button>
-        <button onclick="signOut()" style="background:#aa0000; color:#fff; margin-top:30px;">ENCERRAR SESSÃO</button>
+        <p id="user-info" style="font-size: 0.9em; color: #00cc00;"></p>
+        
+        <button onclick="downloadAPK()">BAIXAR GRAVADOR SUPER V2 (APK)</button>
+        
+        <button class="btn-danger" onclick="signOut()">ENCERRAR SESSÃO</button>
     </div>
 
     <div class="footer">OLIVEIRA APPS &copy; 2026 | SINCERIDADE ABSOLUTA</div>
 
     <script>
-        const client = supabase.createClient('https://xioxooqytfxsjdoqghdu.supabase.co', 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA');
+        const STATUS_EL = document.getElementById('auth-status');
+        const AUTH_CONT = document.getElementById('auth-container');
+        const CONTENT_CONT = document.getElementById('content-container');
+        const USER_INFO = document.getElementById('user-info');
+        const EMAIL_INPUT = document.getElementById('email');
+        const PASS_INPUT = document.getElementById('password');
 
-        async function updateUI() {
-            const { data: { session } } = await client.auth.getSession();
-            const user = session?.user;
-            if (user) {
-                document.getElementById('auth-status').innerText = 'OPERADOR: ' + user.email;
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
+        // Inicialização
+        window.onload = () => {
+            checkSession();
+        };
+
+        function checkSession() {
+            const session = localStorage.getItem('oliveira_session');
+            if (session) {
+                const user = JSON.parse(session);
+                showSystem(user);
             } else {
-                document.getElementById('auth-status').innerText = 'STATUS: DESCONECTADO';
-                document.getElementById('login-form').style.display = 'block';
-                document.getElementById('content').style.display = 'none';
+                showAuth();
             }
         }
 
-        async function signUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await client.auth.signUp({ email, password });
-            if (error) alert('ERRO: ' + error.message);
-            else alert('CADASTRO REALIZADO! Verifique seu e-mail para confirmar.');
+        function showSystem(user) {
+            STATUS_EL.innerText = 'OPERADOR: ' + user.email;
+            USER_INFO.innerText = 'Logado em: ' + new Date(user.loggedInAt).toLocaleString();
+            AUTH_CONT.classList.add('hidden');
+            CONTENT_CONT.classList.remove('hidden');
         }
 
-        async function signIn() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await client.auth.signInWithPassword({ email, password });
-            if (error) alert('FALHA NA AUTENTICAÇÃO: ' + error.message);
-            else updateUI();
+        function showAuth() {
+            STATUS_EL.innerText = 'STATUS: DESCONECTADO';
+            AUTH_CONT.classList.remove('hidden');
+            CONTENT_CONT.classList.add('hidden');
         }
 
-        async function loginWithGoogle() {
-            const { error } = await client.auth.signInWithOAuth({ 
-                provider: 'google',
-                options: { redirectTo: window.location.origin + window.location.pathname }
-            });
-            if (error) alert('ERRO GOOGLE: ' + error.message);
+        function validateEmail(email) {
+            return String(email)
+                .toLowerCase()
+                .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
         }
 
-        async function signOut() {
-            await client.auth.signOut();
-            updateUI();
+        function signUp() {
+            const email = EMAIL_INPUT.value.trim();
+            const password = PASS_INPUT.value;
+
+            if (!validateEmail(email)) {
+                alert('ERRO: Formato de e-mail inválido.');
+                return;
+            }
+
+            if (password.length < 8) {
+                alert('ERRO: A chave de acesso deve ter no mínimo 8 caracteres.');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('oliveira_users') || '[]');
+            
+            if (users.find(u => u.email === email)) {
+                alert('ERRO: E-mail já cadastrado no sistema.');
+                return;
+            }
+
+            const newUser = {
+                email: email,
+                passwordHash: btoa(password), // Codificação simples conforme pedido
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('oliveira_users', JSON.stringify(users));
+
+            alert('CADASTRO REALIZADO COM SUCESSO! Prossiga com o login.');
         }
 
-        client.auth.onAuthStateChange(() => { updateUI(); });
-        updateUI();
+        function signIn() {
+            const email = EMAIL_INPUT.value.trim();
+            const password = PASS_INPUT.value;
+
+            let users = JSON.parse(localStorage.getItem('oliveira_users') || '[]');
+            const user = users.find(u => u.email === email && u.passwordHash === btoa(password));
+
+            if (user) {
+                const sessionUser = {
+                    email: user.email,
+                    loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('oliveira_session', JSON.stringify(sessionUser));
+                checkSession();
+            } else {
+                alert('FALHA NA AUTENTICAÇÃO: Credenciais incorretas.');
+            }
+        }
+
+        function googleSignIn() {
+            alert('GOOGLE AUTH: Redirecionando para portal de segurança (Simulação LocalStorage)...');
+            // Como pedido: works 100% offline/client-side. 
+            // Simulamos um login Google que cria um usuário se não existir.
+            const googleUser = {
+                email: "google_user@oliveira.apps",
+                loggedInAt: new Date().toISOString()
+            };
+            localStorage.setItem('oliveira_session', JSON.stringify(googleUser));
+            checkSession();
+        }
+
+        function signOut() {
+            localStorage.removeItem('oliveira_session');
+            checkSession();
+            EMAIL_INPUT.value = '';
+            PASS_INPUT.value = '';
+        }
+
+        function downloadAPK() {
+            window.location.href = 'https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest';
+        }
     </script>
 </body>
 </html>
