@@ -3,265 +3,607 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oliveira Apps | Portal Oficial</title>
+    <title>OLIVEIRA APPS | CORE ACCESS</title>
+    <!-- Importing a techy font -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: #0a0a0a; 
-            color: #00ff00; 
-            font-family: 'Courier New', Courier, monospace; 
-            text-align: center; 
-            padding: 50px 20px; 
+        :root {
+            --matrix-green: #00ff41;
+            --matrix-dark: #003b00;
+            --bg-color: #050505;
+            --text-glow: 0 0 8px rgba(0, 255, 65, 0.7);
+            --border-glow: 0 0 15px rgba(0, 255, 65, 0.3);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--matrix-green);
+            font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
             overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
-        .card { 
-            border: 2px solid #00ff00; 
-            padding: 30px; 
-            margin: 20px auto; 
-            max-width: 450px; 
-            background: #111; 
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); 
-            border-radius: 8px; 
+
+        /* --- BACKGROUND EFFECTS --- */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.3;
         }
-        h1 { 
-            letter-spacing: 5px; 
-            text-shadow: 2px 2px #000; 
-            font-size: 2.5em;
-            margin-bottom: 10px;
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 101;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 255, 65, 0.1) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 6s linear infinite;
         }
-        h3 {
-            border-bottom: 1px solid #00ff00;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(0, 255, 65, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+        }
+
+        /* --- HEADER & STATUS --- */
+        header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-shadow: var(--text-glow);
+        }
+
+        .system-status {
+            display: flex;
+            gap: 20px;
+            font-size: 0.75rem;
             text-transform: uppercase;
         }
-        button { 
-            background: #0f0; 
-            color: #000; 
-            border: none; 
-            padding: 12px; 
-            width: 100%; 
-            margin-top: 15px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            transition: 0.3s; 
-            font-family: 'Courier New', Courier, monospace;
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .status-label {
+            color: var(--matrix-dark);
+            font-size: 0.6rem;
+        }
+
+        .status-value {
+            color: var(--matrix-green);
+        }
+
+        /* --- MAIN CONTAINER --- */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .terminal-box {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(0, 10, 0, 0.9);
+            border: 1px solid var(--matrix-green);
+            box-shadow: var(--border-glow);
             border-radius: 4px;
+            padding: 0;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
         }
-        button:hover { 
-            background: #0c0; 
-            transform: scale(1.02); 
-            box-shadow: 0 0 10px #0f0;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        input { 
-            width: calc(100% - 24px); 
-            padding: 12px; 
-            margin: 10px 0; 
-            background: #1a1a1a; 
-            color: #0f0; 
-            border: 1px solid #00ff00; 
-            border-radius: 4px; 
-            outline: none;
+
+        .terminal-header {
+            background: var(--matrix-green);
+            color: black;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        input::placeholder {
-            color: #006600;
+
+        .terminal-controls span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: black;
+            margin-left: 5px;
+            opacity: 0.3;
         }
-        #auth-status { 
-            margin-bottom: 20px; 
-            font-weight: bold; 
-            font-size: 1.1em; 
-            color: #00ff00;
+
+        .terminal-content {
+            padding: 30px;
+        }
+
+        /* --- TABS --- */
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--matrix-dark);
+            padding: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: var(--transition-speed);
+        }
+
+        .tab-btn.active {
+            color: var(--matrix-green);
+            border-bottom: 2px solid var(--matrix-green);
+            text-shadow: var(--text-glow);
+        }
+
+        /* --- FORMS --- */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+            color: var(--matrix-dark);
             text-transform: uppercase;
         }
-        .footer { 
-            margin-top: 40px; 
-            font-size: 0.8em; 
-            color: #008800; 
-            letter-spacing: 2px;
+
+        input {
+            width: 100%;
+            background: rgba(0, 20, 0, 0.5);
+            border: 1px solid var(--matrix-dark);
+            padding: 12px;
+            color: var(--matrix-green);
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition-speed);
         }
-        .btn-secondary {
-            background: #222; 
-            color: #0f0; 
-            border: 1px solid #0f0;
+
+        input:focus {
+            border-color: var(--matrix-green);
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
         }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            font-family: inherit;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: var(--transition-speed);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: var(--matrix-green);
+            color: black;
+            box-shadow: var(--border-glow);
+        }
+
         .btn-google {
-            background: #4285f4; 
-            color: #fff; 
-            border: none;
+            border-color: #4285f4;
+            color: #4285f4;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-top: 20px;
         }
+
         .btn-google:hover {
-            background: #357ae8;
-            box-shadow: 0 0 10px #4285f4;
+            background: #4285f4;
+            color: white;
+            box-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
         }
-        .btn-danger {
-            background: #aa0000; 
-            color: #fff; 
-            margin-top: 30px;
-        }
-        .btn-danger:hover {
-            background: #880000;
-            box-shadow: 0 0 10px #ff0000;
-        }
+
         .hidden {
             display: none !important;
+        }
+
+        /* --- DASHBOARD --- */
+        .dashboard {
+            text-align: left;
+        }
+
+        .user-welcome {
+            margin-bottom: 20px;
+            border-left: 3px solid var(--matrix-green);
+            padding-left: 15px;
+        }
+
+        .user-welcome h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            padding: 10px;
+            background: rgba(0, 255, 65, 0.05);
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--matrix-dark);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-logout {
+            border-color: #ff3e3e;
+            color: #ff3e3e;
+            margin-top: 20px;
+        }
+
+        .btn-logout:hover {
+            background: #ff3e3e;
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 62, 62, 0.5);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 0.6rem;
+            color: var(--matrix-dark);
+            letter-spacing: 5px;
+            border-top: 1px solid rgba(0, 255, 65, 0.1);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .system-status {
+                width: 100%;
+                justify-content: space-around;
+            }
+            .terminal-box {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>OLIVEIRA APPS</h1>
-    <div id="auth-status">INICIALIZANDO...</div>
-    
-    <!-- Tela de Login/Cadastro -->
-    <div id="auth-container" class="card hidden">
-        <h3 id="form-title">ACESSO RESTRITO</h3>
-        
-        <input type="email" id="email" placeholder="EMAIL DO OPERADOR">
-        <input type="password" id="password" placeholder="CHAVE DE ACESSO (MIN 8 CHARS)">
-        
-        <button id="btn-login" onclick="signIn()">LOGAR NO SISTEMA</button>
-        <button id="btn-signup" class="btn-secondary" onclick="signUp()">CRIAR NOVO ACESSO</button>
-        
-        <div style="margin: 20px 0; border-top: 1px solid #333;"></div>
-        
-        <button class="btn-google" onclick="googleSignIn()">
-            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="currentColor" d="M17.64 8.29c.12.47.18.96.18 1.46 0 2.21-.79 4.09-2.16 5.43l-2.61-2.03c.69-.47 1.17-1.25 1.17-2.15 0-.25-.03-.49-.08-.73h-5.11v-1.98h7.61zm-7.61 5.92c-1.89 0-3.5-1.28-4.08-3.03l-2.69 2.08c1.32 2.61 4.03 4.41 7.18 4.41 1.99 0 3.8-.73 5.17-1.95l-2.6-2.02c-.75.52-1.7.83-2.98.83zm-7.61-7.85l2.69 2.08c.58-1.75 2.19-3.03 4.08-3.03 1.25 0 2.38.43 3.27 1.15l1.83-1.83C13.2 2.91 11.66 2.19 10.03 2.19c-3.15 0-5.86 1.8-7.18 4.41z"/></svg>
-            GOOGLE AUTH
-        </button>
-    </div>
+    <div class="grid-bg"></div>
+    <div class="scanline"></div>
 
-    <!-- Tela do Sistema Liberado -->
-    <div id="content-container" class="card hidden">
-        <h3>SISTEMA LIBERADO</h3>
-        <p>Acesso ao núcleo de produção confirmado.</p>
-        <p id="user-info" style="font-size: 0.9em; color: #00cc00;"></p>
-        
-        <button onclick="downloadAPK()">BAIXAR GRAVADOR SUPER V2 (APK)</button>
-        
-        <button class="btn-danger" onclick="signOut()">ENCERRAR SESSÃO</button>
-    </div>
+    <header>
+        <div class="logo">OLIVEIRA_APPS</div>
+        <div class="system-status">
+            <div class="status-item">
+                <span class="status-label">Uptime</span>
+                <span id="uptime-val" class="status-value">00:00:00</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">System Load</span>
+                <span id="load-val" class="status-value">2.4%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Network</span>
+                <span id="net-val" class="status-value">Active</span>
+            </div>
+        </div>
+    </header>
 
-    <div class="footer">OLIVEIRA APPS &copy; 2026 | SINCERIDADE ABSOLUTA</div>
+    <main>
+        <div class="terminal-box">
+            <div class="terminal-header">
+                <div class="terminal-title">TERMINAL ACCESS v4.0.2</div>
+                <div class="terminal-controls">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            
+            <div class="terminal-content">
+                <!-- AUTH SECTION -->
+                <div id="auth-section">
+                    <div class="tabs">
+                        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+                        <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Register</button>
+                    </div>
+
+                    <form id="auth-form" onsubmit="handleAuth(event)">
+                        <div class="form-group">
+                            <label>Operator Identifier</label>
+                            <input type="email" id="email" placeholder="email@domain.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Access Key</label>
+                            <input type="password" id="password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn" id="submit-btn">Initialize Connection</button>
+                    </form>
+
+                    <button class="btn btn-google" onclick="googleSignIn()">
+                        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="currentColor" d="M17.64 8.29c.12.47.18.96.18 1.46 0 2.21-.79 4.09-2.16 5.43l-2.61-2.03c.69-.47 1.17-1.25 1.17-2.15 0-.25-.03-.49-.08-.73h-5.11v-1.98h7.61zm-7.61 5.92c-1.89 0-3.5-1.28-4.08-3.03l-2.69 2.08c1.32 2.61 4.03 4.41 7.18 4.41 1.99 0 3.8-.73 5.17-1.95l-2.6-2.02c-.75.52-1.7.83-2.98.83zm-7.61-7.85l2.69 2.08c.58-1.75 2.19-3.03 4.08-3.03 1.25 0 2.38.43 3.27 1.15l1.83-1.83C13.2 2.91 11.66 2.19 10.03 2.19c-3.15 0-5.86 1.8-7.18 4.41z"/></svg>
+                        Google Auth Bridge
+                    </button>
+                </div>
+
+                <!-- DASHBOARD SECTION -->
+                <div id="dashboard-section" class="hidden">
+                    <div class="dashboard">
+                        <div class="user-welcome">
+                            <span class="status-label">Authorized Operator</span>
+                            <h2 id="display-email">OPERATOR@SYSTEM</h2>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">Access Level</div>
+                                <div class="stat-value">Core Level 7</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Session ID</div>
+                                <div class="stat-value" id="session-id">8F-9A-C1</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Packets Sync</div>
+                                <div class="stat-value">99.8%</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Local Time</div>
+                                <div class="stat-value" id="local-time">--:--</div>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn" onclick="downloadAPK()">Nucleus: Download APK</button>
+                            <button class="btn btn-logout" onclick="signOut()">Terminate Session</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        OLIVEIRA APPS CORE INTERFACE // SINCERIDADE ABSOLUTA // EST. 2026
+    </footer>
 
     <script>
-        const STATUS_EL = document.getElementById('auth-status');
-        const AUTH_CONT = document.getElementById('auth-container');
-        const CONTENT_CONT = document.getElementById('content-container');
-        const USER_INFO = document.getElementById('user-info');
-        const EMAIL_INPUT = document.getElementById('email');
-        const PASS_INPUT = document.getElementById('password');
-
-        // Inicialização
-        window.onload = () => {
-            checkSession();
+        /**
+         * FIREBASE CONFIGURATION (Placeholder)
+         * Drop your Firebase keys here later.
+         */
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "oliveira-apps.firebaseapp.com",
+            projectId: "oliveira-apps",
+            storageBucket: "oliveira-apps.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        function checkSession() {
-            const session = localStorage.getItem('oliveira_session');
-            if (session) {
-                const user = JSON.parse(session);
-                showSystem(user);
+        // --- STATE MANAGEMENT ---
+        let currentMode = 'login';
+        const STORAGE_KEY = 'oliveira_portal_session';
+        const USERS_KEY = 'oliveira_portal_users';
+
+        // --- UI ELEMENTS ---
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const authForm = document.getElementById('auth-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submit-btn');
+        const displayEmail = document.getElementById('display-email');
+        const localTimeEl = document.getElementById('local-time');
+        const uptimeEl = document.getElementById('uptime-val');
+        const sessionIdEl = document.getElementById('session-id');
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            startSystemMonitors();
+        });
+
+        function switchTab(mode) {
+            currentMode = mode;
+            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+            submitBtn.innerText = mode === 'login' ? 'Initialize Connection' : 'Register Operator';
+        }
+
+        // --- AUTH LOGIC ---
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (currentMode === 'login') {
+                signIn(email, password);
             } else {
-                showAuth();
+                signUp(email, password);
             }
         }
 
-        function showSystem(user) {
-            STATUS_EL.innerText = 'OPERADOR: ' + user.email;
-            USER_INFO.innerText = 'Logado em: ' + new Date(user.loggedInAt).toLocaleString();
-            AUTH_CONT.classList.add('hidden');
-            CONTENT_CONT.classList.remove('hidden');
-        }
-
-        function showAuth() {
-            STATUS_EL.innerText = 'STATUS: DESCONECTADO';
-            AUTH_CONT.classList.remove('hidden');
-            CONTENT_CONT.classList.add('hidden');
-        }
-
-        function validateEmail(email) {
-            return String(email)
-                .toLowerCase()
-                .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-        }
-
-        function signUp() {
-            const email = EMAIL_INPUT.value.trim();
-            const password = PASS_INPUT.value;
-
-            if (!validateEmail(email)) {
-                alert('ERRO: Formato de e-mail inválido.');
-                return;
-            }
-
-            if (password.length < 8) {
-                alert('ERRO: A chave de acesso deve ter no mínimo 8 caracteres.');
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('oliveira_users') || '[]');
-            
+        function signUp(email, password) {
+            let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
             if (users.find(u => u.email === email)) {
-                alert('ERRO: E-mail já cadastrado no sistema.');
+                alert('CRITICAL ERROR: Operator ID already registered.');
                 return;
             }
 
             const newUser = {
-                email: email,
-                passwordHash: btoa(password), // Codificação simples conforme pedido
+                email,
+                hash: btoa(password), // Temporary local hash
                 createdAt: new Date().toISOString()
             };
 
             users.push(newUser);
-            localStorage.setItem('oliveira_users', JSON.stringify(users));
-
-            alert('CADASTRO REALIZADO COM SUCESSO! Prossiga com o login.');
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            alert('REGISTRATION SUCCESSFUL. Access granted for initial login.');
+            switchTab('login');
         }
 
-        function signIn() {
-            const email = EMAIL_INPUT.value.trim();
-            const password = PASS_INPUT.value;
-
-            let users = JSON.parse(localStorage.getItem('oliveira_users') || '[]');
-            const user = users.find(u => u.email === email && u.passwordHash === btoa(password));
+        function signIn(email, password) {
+            let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+            const user = users.find(u => u.email === email && u.hash === btoa(password));
 
             if (user) {
-                const sessionUser = {
-                    email: user.email,
-                    loggedInAt: new Date().toISOString()
-                };
-                localStorage.setItem('oliveira_session', JSON.stringify(sessionUser));
-                checkSession();
+                establishSession(user.email);
             } else {
-                alert('FALHA NA AUTENTICAÇÃO: Credenciais incorretas.');
+                alert('ACCESS DENIED: Invalid Operator Key.');
             }
         }
 
         function googleSignIn() {
-            alert('GOOGLE AUTH: Redirecionando para portal de segurança (Simulação LocalStorage)...');
-            // Como pedido: works 100% offline/client-side. 
-            // Simulamos um login Google que cria um usuário se não existir.
-            const googleUser = {
-                email: "google_user@oliveira.apps",
-                loggedInAt: new Date().toISOString()
+            alert('REDIRECTING TO GOOGLE AUTH BRIDGE...');
+            // Simulating Google login
+            setTimeout(() => {
+                establishSession('google_operator@oliveira.sys');
+            }, 1000);
+        }
+
+        function establishSession(email) {
+            const session = {
+                email,
+                token: Math.random().toString(36).substring(7),
+                startTime: new Date().getTime()
             };
-            localStorage.setItem('oliveira_session', JSON.stringify(googleUser));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
             checkSession();
+        }
+
+        function checkSession() {
+            const sessionData = localStorage.getItem(STORAGE_KEY);
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                authSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                displayEmail.innerText = session.email.toUpperCase();
+                sessionIdEl.innerText = session.token.toUpperCase() + '-' + (Math.floor(Math.random() * 90) + 10);
+            } else {
+                authSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
+            }
         }
 
         function signOut() {
-            localStorage.removeItem('oliveira_session');
+            localStorage.removeItem(STORAGE_KEY);
             checkSession();
-            EMAIL_INPUT.value = '';
-            PASS_INPUT.value = '';
         }
 
+        // --- UTILS ---
         function downloadAPK() {
-            window.location.href = 'https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest';
+            window.open('https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest', '_blank');
+        }
+
+        // --- SYSTEM MONITORS (FAKES) ---
+        function startSystemMonitors() {
+            // Clock
+            setInterval(() => {
+                const now = new Date();
+                localTimeEl.innerText = now.toLocaleTimeString('pt-BR', { hour12: false });
+            }, 1000);
+
+            // Uptime counter
+            let start = Date.now();
+            setInterval(() => {
+                let delta = Math.floor((Date.now() - start) / 1000);
+                let h = Math.floor(delta / 3600).toString().padStart(2, '0');
+                let m = Math.floor((delta % 3600) / 60).toString().padStart(2, '0');
+                let s = (delta % 60).toString().padStart(2, '0');
+                uptimeEl.innerText = `${h}:${m}:${s}`;
+            }, 1000);
+
+            // CPU Load jitter
+            setInterval(() => {
+                let load = (Math.random() * 5 + 1).toFixed(1);
+                document.getElementById('load-val').innerText = load + '%';
+            }, 3000);
         }
     </script>
 </body>
