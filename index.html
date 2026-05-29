@@ -2,54 +2,89 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Oliveira Apps Portal</title>
+    <title>Oliveira Apps | Portal Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #0a0a0a; color: #00ff00; font-family: sans-serif; text-align: center; padding: 50px; }
-        .card { border: 1px solid #0f0; padding: 20px; margin: 20px auto; max-width: 400px; background: #111; }
-        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
-        input { display: block; width: 80%; margin: 10px auto; padding: 10px; background: #222; color: #0f0; border: 1px solid #0f0; }
+        body { background: #0a0a0a; color: #00ff00; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 50px; }
+        .card { border: 2px solid #00ff00; padding: 30px; margin: 20px auto; max-width: 450px; background: #111; box-shadow: 0 0 15px rgba(0, 255, 0, 0.2); border-radius: 8px; }
+        h1 { letter-spacing: 5px; text-shadow: 2px 2px #000; }
+        button { background: #0f0; color: #000; border: none; padding: 12px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        button:hover { background: #0c0; transform: scale(1.02); }
+        input { width: calc(100% - 24px); padding: 12px; margin: 10px 0; background: #1a1a1a; color: #0f0; border: 1px solid #00ff00; border-radius: 4px; }
+        #auth-status { margin-bottom: 20px; font-weight: bold; font-size: 1.1em; }
+        .footer { margin-top: 40px; font-size: 0.8em; color: #008800; }
     </style>
 </head>
 <body>
-    <h1>OLIVEIRA APPS - PORTAL 2026</h1>
-    <div id="auth-status">Conectando...</div>
+    <h1>OLIVEIRA APPS</h1>
+    <div id="auth-status">Verificando sistema...</div>
     
-    <div id="login-form" class="card">
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
+    <div id="login-form" class="card" style="display:none">
+        <h3>ACESSO RESTRITO</h3>
+        <input type="email" id="email" placeholder="EMAIL DO OPERADOR">
+        <input type="password" id="password" placeholder="CHAVE DE ACESSO">
+        <button onclick="signIn()">LOGAR</button>
+        <button onclick="signUp()" style="background:#222; color:#0f0; border:1px solid #0f=;">CADASTRAR</button>
+        <button onclick="loginWithGoogle()" style="background:#4285f4; color:#fff; border:none;">GOOGLE AUTH</button>
     </div>
 
-    <div id="locked-content" class="card" style="display:none">
-        <h3>✅ Gravador Super v2 Pronto</h3>
-        <p>Acesse o repositório para baixar o APK do Build #94.</p>
-        <button onclick="window.location.href='https://github.com/guga13500-spec/oliveira-apps-portal'">Ir para Download</button>
+    <div id="content" class="card" style="display:none">
+        <h3>SISTEMA LIBERADO</h3>
+        <p>Acesso ao núcleo de produção confirmado.</p>
+        <button onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR GRAVADOR SUPER V2 (APK)</button>
+        <button onclick="signOut()" style="background:#aa0000; color:#fff; margin-top:30px;">ENCERRAR SESSÃO</button>
     </div>
+
+    <div class="footer">OLIVEIRA APPS &copy; 2026 | SINCERIDADE ABSOLUTA</div>
 
     <script>
-        const supabaseClient = supabase.createClient('https://xioxooqytfxsjdoqghdu.supabase.co', 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA');
-        async function check() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            const status = document.getElementById('auth-status');
-            const form = document.getElementById('login-form');
-            const content = document.getElementById('locked-content');
+        const client = supabase.createClient('https://xioxooqytfxsjdoqghdu.supabase.co', 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA');
+
+        async function updateUI() {
+            const { data: { session } } = await client.auth.getSession();
+            const user = session?.user;
             if (user) {
-                status.innerText = "Olá, " + user.email;
-                form.style.display = 'none';
-                content.style.display = 'block';
+                document.getElementById('auth-status').innerText = 'OPERADOR: ' + user.email;
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
             } else {
-                status.innerText = "Faça login para acessar os apps";
+                document.getElementById('auth-status').innerText = 'STATUS: DESCONECTADO';
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('content').style.display = 'none';
             }
         }
-        async function login() {
+
+        async function signUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-            else check();
+            const { error } = await client.auth.signUp({ email, password });
+            if (error) alert('ERRO: ' + error.message);
+            else alert('CADASTRO REALIZADO! Verifique seu e-mail para confirmar.');
         }
-        window.onload = check;
+
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await client.auth.signInWithPassword({ email, password });
+            if (error) alert('FALHA NA AUTENTICAÇÃO: ' + error.message);
+            else updateUI();
+        }
+
+        async function loginWithGoogle() {
+            const { error } = await client.auth.signInWithOAuth({ 
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+            if (error) alert('ERRO GOOGLE: ' + error.message);
+        }
+
+        async function signOut() {
+            await client.auth.signOut();
+            updateUI();
+        }
+
+        client.auth.onAuthStateChange(() => { updateUI(); });
+        updateUI();
     </script>
 </body>
 </html>
