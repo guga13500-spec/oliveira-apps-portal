@@ -52,10 +52,6 @@
             letter-spacing: 2px;
         }
 
-        .tabs {
-            display: none; /* Escondi as abas para usar o link de alternar */
-        }
-
         .form-group {
             margin-bottom: 1rem;
         }
@@ -86,11 +82,18 @@
             cursor: pointer;
             transition: 0.3s;
             margin-bottom: 1rem;
+            display: block;
+            text-align: center;
+            text-decoration: none;
         }
 
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0052a3;
         }
 
         .btn-google {
@@ -101,6 +104,10 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+        }
+
+        .btn-google:hover {
+            background-color: #f1f1f1;
         }
 
         .error-message {
@@ -123,6 +130,32 @@
             color: var(--primary-color);
             text-decoration: none;
             font-weight: 600;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: #ddd;
+            z-index: 1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 10px;
+            position: relative;
+            z-index: 2;
+            color: #999;
+            font-size: 0.8rem;
         }
 
         #dashboard {
@@ -148,21 +181,29 @@
     <div id="auth-forms">
         <div id="error-display" class="error-message"></div>
 
-        <!-- LOGIN FORM -->
+        <!-- LOGIN SCREEN -->
         <div id="login-section">
             <div class="form-group">
-                <label>E-mail ou Usuário</label>
-                <input type="text" id="login-id" placeholder="Digite seu e-mail">
+                <label>Nome de usuário ou E-mail</label>
+                <input type="text" id="login-id" placeholder="Digite seu usuário ou e-mail">
             </div>
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" id="login-pass" placeholder="Sua senha">
             </div>
-            <button class="btn btn-primary" onclick="handleAuth('login')">ENTRAR</button>
-            <div class="switch-link">Não tem uma conta? <a href="#" onclick="switchMode('register')">Cadastre-se</a></div>
+            <button class="btn btn-primary" id="btn-login">ENTRAR</button>
+            
+            <div class="divider"><span>OU</span></div>
+            
+            <button class="btn btn-google btn-google-login">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Entrar com o Google
+            </button>
+            
+            <div class="switch-link">Não tem uma conta? <a href="#" id="link-to-register">Cadastre-se</a></div>
         </div>
 
-        <!-- REGISTER FORM -->
+        <!-- REGISTER SCREEN -->
         <div id="register-section" style="display: none;">
             <div class="form-group">
                 <label>Nome de usuário</label>
@@ -184,20 +225,21 @@
                 <label>Gênero</label>
                 <select id="reg-gender">
                     <option value="">Selecione...</option>
-                    <option value="menino">Menino</option>
-                    <option value="menina">Menina</option>
+                    <option value="Menino">Menino</option>
+                    <option value="Menina">Menina</option>
                 </select>
             </div>
-            <button class="btn btn-primary" onclick="handleAuth('register')">CRIAR CONTA</button>
-            <div class="switch-link">Já tem conta? <a href="#" onclick="switchMode('login')">Fazer Login</a></div>
+            <button class="btn btn-primary" id="btn-register">CRIAR CONTA</button>
+
+            <div class="divider"><span>OU MAIS RÁPIDO</span></div>
+
+            <button class="btn btn-google btn-google-register">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Entrar com o Google
+            </button>
+
+            <div class="switch-link">Já tem conta? <a href="#" id="link-to-login">Fazer Login</a></div>
         </div>
-
-        <div style="text-align: center; margin: 1rem 0; color: #999; font-size: 0.9rem;">OU</div>
-
-        <button class="btn btn-google" onclick="loginWithGoogle()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-            ENTRAR COM O GOOGLE
-        </button>
     </div>
 
     <!-- DASHBOARD -->
@@ -207,82 +249,132 @@
             <p>Olá, <strong id="display-name">Usuário</strong>!</p>
             <p id="display-email"></p>
         </div>
-        <button class="btn btn-primary" onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR APK</button>
-        <button class="btn" onclick="logout()">SAIR</button>
+        <a href="https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest" class="btn btn-primary">BAIXAR APK</a>
+        <button class="btn" id="btn-logout">SAIR</button>
     </div>
 </div>
 
 <script>
     const SUPABASE_URL = 'https://xioxooqytfxsjdoqghdu.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Corect Initialization according to requirements
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function switchMode(mode) {
-        document.getElementById('login-section').style.display = mode === 'login' ? 'block' : 'none';
-        document.getElementById('register-section').style.display = mode === 'register' ? 'block' : 'none';
+    // Elements
+    const loginSection = document.getElementById('login-section');
+    const registerSection = document.getElementById('register-section');
+    const errorDisplay = document.getElementById('error-display');
+    const dashboard = document.getElementById('dashboard');
+    const authForms = document.getElementById('auth-forms');
+
+    // Navigation
+    document.getElementById('link-to-register').addEventListener('click', (e) => {
+        e.preventDefault();
+        loginSection.style.display = 'none';
+        registerSection.style.display = 'block';
         hideError();
-    }
+    });
+
+    document.getElementById('link-to-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        registerSection.style.display = 'none';
+        loginSection.style.display = 'block';
+        hideError();
+    });
 
     function showError(msg) {
-        const errDiv = document.getElementById('error-display');
-        errDiv.innerText = msg;
-        errDiv.style.display = 'block';
+        errorDisplay.innerText = msg;
+        errorDisplay.style.display = 'block';
     }
 
     function hideError() {
-        document.getElementById('error-display').style.display = 'none';
+        errorDisplay.style.display = 'none';
     }
 
-    async function handleAuth(mode) {
-        hideError();
-        if (mode === 'register') {
-            const username = document.getElementById('reg-username').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const confirm = document.getElementById('reg-pass-confirm').value;
-            const gender = document.getElementById('reg-gender').value;
-
-            if (!username || !email || !pass || !confirm || !gender) return showError("Preencha tudo!");
-            if (pass !== confirm) return showError("As senhas não batem!");
-            if (pass.length < 6) return showError("Senha curta (mínimo 6)!");
-
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password: pass,
-                options: { data: { username, gender } }
+    // Auth Functions
+    async function loginWithGoogle() {
+        try {
+            const { error } = await supabaseClient.auth.signInWithOAuth({ 
+                provider: 'google',
+                options: { redirectTo: window.location.href }
             });
-
-            if (error) showError(error.message);
-            else alert("Conta criada! Verifique seu e-mail.");
-
-        } else {
-            const id = document.getElementById('login-id').value;
-            const pass = document.getElementById('login-pass').value;
-            const { data, error } = await supabase.auth.signInWithPassword({ email: id, password: pass });
-            if (error) showError("Erro no login. Verifique os dados.");
+            if (error) throw error;
+        } catch (error) {
+            showError(error.message);
         }
     }
 
-    async function loginWithGoogle() {
-        const { error } = await supabase.auth.signInWithOAuth({ 
-            provider: 'google',
-            options: { redirectTo: window.location.href }
-        });
-        if (error) showError(error.message);
-    }
+    document.querySelectorAll('.btn-google').forEach(btn => {
+        btn.addEventListener('click', loginWithGoogle);
+    });
 
-    async function logout() {
-        await supabase.auth.signOut();
-        location.reload();
-    }
+    document.getElementById('btn-login').addEventListener('click', async () => {
+        const emailOrUser = document.getElementById('login-id').value;
+        const pass = document.getElementById('login-pass').value;
 
-    supabase.auth.onAuthStateChange((event, session) => {
+        if (!emailOrUser || !pass) return showError("Preencha todos os campos.");
+
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: emailOrUser,
+                password: pass
+            });
+            if (error) throw error;
+        } catch (error) {
+            showError("Erro no login: " + error.message);
+        }
+    });
+
+    document.getElementById('btn-register').addEventListener('click', async () => {
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
+        const confirm = document.getElementById('reg-pass-confirm').value;
+        const gender = document.getElementById('reg-gender').value;
+
+        if (!username || !email || !pass || !confirm || !gender) return showError("Preencha todos os campos!");
+        if (pass !== confirm) return showError("As senhas não coincidem!");
+        if (pass.length < 6) return showError("A senha deve ter pelo menos 6 caracteres.");
+
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password: pass,
+                options: { 
+                    data: { 
+                        username: username, 
+                        gender: gender 
+                    } 
+                }
+            });
+            if (error) throw error;
+            alert("Cadastro realizado! Verifique seu e-mail para confirmar a conta.");
+        } catch (error) {
+            showError("Erro no cadastro: " + error.message);
+        }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.reload();
+    });
+
+    // Handle Auth State Change
+    supabaseClient.auth.onAuthStateChange((event, session) => {
         if (session) {
-            document.getElementById('auth-forms').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            const meta = session.user.user_metadata;
-            document.getElementById('display-name').innerText = meta.username || session.user.email;
-            document.getElementById('display-email').innerText = session.user.email;
+            authForms.style.display = 'none';
+            dashboard.style.display = 'block';
+            
+            const user = session.user;
+            const meta = user.user_metadata;
+            
+            document.getElementById('display-name').innerText = meta.username || user.email;
+            document.getElementById('display-email').innerText = user.email;
+        } else {
+            authForms.style.display = 'block';
+            dashboard.style.display = 'none';
         }
     });
 </script>
