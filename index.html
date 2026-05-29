@@ -53,24 +53,7 @@
         }
 
         .tabs {
-            display: flex;
-            border-bottom: 2px solid #eee;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 0.8rem;
-            cursor: pointer;
-            font-weight: 600;
-            color: #666;
-            transition: 0.3s;
-        }
-
-        .tab.active {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
+            display: none; /* Escondi as abas para usar o link de alternar */
         }
 
         .form-group {
@@ -93,12 +76,6 @@
             font-size: 1rem;
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 5px rgba(0,102,204,0.2);
-        }
-
         .btn {
             width: 100%;
             padding: 0.9rem;
@@ -116,10 +93,6 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            background-color: #0052a3;
-        }
-
         .btn-google {
             background-color: white;
             color: #555;
@@ -128,10 +101,6 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-        }
-
-        .btn-google:hover {
-            background-color: #f1f1f1;
         }
 
         .error-message {
@@ -144,14 +113,18 @@
             font-size: 0.9rem;
         }
 
-        .status-message {
+        .switch-link {
             text-align: center;
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 1rem;
+            font-size: 0.9rem;
+            margin-top: 10px;
         }
 
-        /* Dash Area */
+        .switch-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
         #dashboard {
             display: none;
             text-align: center;
@@ -163,14 +136,6 @@
             border-radius: var(--border-radius);
             margin-bottom: 1.5rem;
         }
-
-        .footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.75rem;
-            color: #999;
-            text-transform: uppercase;
-        }
     </style>
 </head>
 <body>
@@ -181,31 +146,27 @@
     </div>
 
     <div id="auth-forms">
-        <div class="tabs">
-            <div class="tab active" id="tab-login" onclick="switchMode('login')">LOGIN</div>
-            <div class="tab" id="tab-register" onclick="switchMode('register')">CADASTRO</div>
-        </div>
-
         <div id="error-display" class="error-message"></div>
 
         <!-- LOGIN FORM -->
         <div id="login-section">
             <div class="form-group">
-                <label>E-mail</label>
-                <input type="email" id="login-id" placeholder="Ex: joao@email.com">
+                <label>E-mail ou Usuário</label>
+                <input type="text" id="login-id" placeholder="Digite seu e-mail">
             </div>
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" id="login-pass" placeholder="Sua senha">
             </div>
-            <button class="btn btn-primary" onclick="handleAuth('login')">ENTRAR NO PORTAL</button>
+            <button class="btn btn-primary" onclick="handleAuth('login')">ENTRAR</button>
+            <div class="switch-link">Não tem uma conta? <a href="#" onclick="switchMode('register')">Cadastre-se</a></div>
         </div>
 
         <!-- REGISTER FORM -->
         <div id="register-section" style="display: none;">
             <div class="form-group">
-                <label>Nome completo</label>
-                <input type="text" id="reg-name" placeholder="Como quer ser chamado?">
+                <label>Nome de usuário</label>
+                <input type="text" id="reg-username" placeholder="Escolha um nome">
             </div>
             <div class="form-group">
                 <label>E-mail</label>
@@ -216,42 +177,42 @@
                 <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
             </div>
             <div class="form-group">
+                <label>Digite novamente a senha</label>
+                <input type="password" id="reg-pass-confirm" placeholder="Confirme sua senha">
+            </div>
+            <div class="form-group">
                 <label>Gênero</label>
                 <select id="reg-gender">
                     <option value="">Selecione...</option>
-                    <option value="menino">Masculino (Menino)</option>
-                    <option value="menina">Feminino (Menina)</option>
+                    <option value="menino">Menino</option>
+                    <option value="menina">Menina</option>
                 </select>
             </div>
-            <button class="btn btn-primary" onclick="handleAuth('register')">CRIAR MINHA CONTA</button>
+            <button class="btn btn-primary" onclick="handleAuth('register')">CRIAR CONTA</button>
+            <div class="switch-link">Já tem conta? <a href="#" onclick="switchMode('login')">Fazer Login</a></div>
         </div>
 
         <div style="text-align: center; margin: 1rem 0; color: #999; font-size: 0.9rem;">OU</div>
 
         <button class="btn btn-google" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-            ENTRAR RÁPIDO COM GOOGLE
+            ENTRAR COM O GOOGLE
         </button>
-
-        <p class="status-message" id="status-text">Status: Sistema Online</p>
     </div>
 
-    <!-- DASHBOARD SECTION -->
+    <!-- DASHBOARD -->
     <div id="dashboard">
         <h2>ACESSO LIBERADO</h2>
         <div class="user-info">
             <p>Olá, <strong id="display-name">Usuário</strong>!</p>
-            <p id="display-email" style="font-size: 0.9rem; color: #666;"></p>
+            <p id="display-email"></p>
         </div>
-        <button class="btn btn-primary" onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR GRAVADOR SUPER V2</button>
-        <button class="btn" style="background: #eee;" onclick="logout()">SAIR DO SISTEMA</button>
+        <button class="btn btn-primary" onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR APK</button>
+        <button class="btn" onclick="logout()">SAIR</button>
     </div>
-
-    <div class="footer">Oliveira Apps &copy; 2026 - Sinceridade Absoluta</div>
 </div>
 
 <script>
-    // CONFIGURAÇÃO DO SUPABASE
     const SUPABASE_URL = 'https://xioxooqytfxsjdoqghdu.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA';
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -259,8 +220,6 @@
     function switchMode(mode) {
         document.getElementById('login-section').style.display = mode === 'login' ? 'block' : 'none';
         document.getElementById('register-section').style.display = mode === 'register' ? 'block' : 'none';
-        document.getElementById('tab-login').className = mode === 'login' ? 'tab active' : 'tab';
-        document.getElementById('tab-register').className = mode === 'register' ? 'tab active' : 'tab';
         hideError();
     }
 
@@ -277,47 +236,37 @@
     async function handleAuth(mode) {
         hideError();
         if (mode === 'register') {
-            const name = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-username').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
+            const confirm = document.getElementById('reg-pass-confirm').value;
             const gender = document.getElementById('reg-gender').value;
 
-            if (!name || !email || !pass || !gender) return showError("Preencha todos os campos.");
-            if (pass.length < 6) return showError("A senha deve ter pelo menos 6 caracteres.");
+            if (!username || !email || !pass || !confirm || !gender) return showError("Preencha tudo!");
+            if (pass !== confirm) return showError("As senhas não batem!");
+            if (pass.length < 6) return showError("Senha curta (mínimo 6)!");
 
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password: pass,
-                options: {
-                    data: { name, gender }
-                }
+                options: { data: { username, gender } }
             });
 
             if (error) showError(error.message);
-            else alert("Cadastro realizado! Verifique seu e-mail (se necessário) ou faça login.");
+            else alert("Conta criada! Verifique seu e-mail.");
 
         } else {
-            const email = document.getElementById('login-id').value;
+            const id = document.getElementById('login-id').value;
             const pass = document.getElementById('login-pass').value;
-
-            if (!email || !pass) return showError("Preencha e-mail e senha.");
-
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password: pass
-            });
-
-            if (error) showError("E-mail ou senha incorretos.");
+            const { data, error } = await supabase.auth.signInWithPassword({ email: id, password: pass });
+            if (error) showError("Erro no login. Verifique os dados.");
         }
     }
 
     async function loginWithGoogle() {
-        hideError();
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({ 
             provider: 'google',
-            options: {
-                redirectTo: window.location.href
-            }
+            options: { redirectTo: window.location.href }
         });
         if (error) showError(error.message);
     }
@@ -327,30 +276,15 @@
         location.reload();
     }
 
-    // Monitor de estado
     supabase.auth.onAuthStateChange((event, session) => {
-        if (session && session.user) {
-            const user = session.user;
+        if (session) {
             document.getElementById('auth-forms').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('display-name').innerText = user.user_metadata.name || user.email.split('@')[0];
-            document.getElementById('display-email').innerText = user.email;
-        } else {
-            document.getElementById('auth-forms').style.display = 'block';
-            document.getElementById('dashboard').style.display = 'none';
+            const meta = session.user.user_metadata;
+            document.getElementById('display-name').innerText = meta.username || session.user.email;
+            document.getElementById('display-email').innerText = session.user.email;
         }
     });
-
-    // Detecta offline
-    window.addEventListener('offline', () => {
-        document.getElementById('status-text').innerText = "Status: Sem conexão (Offline)";
-        document.getElementById('status-text').style.color = "red";
-    });
-    window.addEventListener('online', () => {
-        document.getElementById('status-text').innerText = "Status: Sistema Online";
-        document.getElementById('status-text').style.color = "#666";
-    });
 </script>
-
 </body>
 </html>
