@@ -3,124 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oliveira Apps | Portal de Acesso</title>
-    <!-- Fontes e Ícones -->
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <title>Oliveira Apps | Portal Oficial</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
-            --primary-color: #0066cc;
-            --secondary-color: #f8f9fa;
-            --text-color: #333;
-            --error-color: #dc3545;
-            --success-color: #28a745;
-            --border-radius: 8px;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --error: #ef4444;
+            --success: #10b981;
+            --border: #e5e7eb;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            font-family: 'Inter', 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            color: var(--text-color);
+            padding: 20px;
         }
 
-        .auth-container {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .container {
+            background: var(--card-bg);
             width: 100%;
-            max-width: 450px;
+            max-width: 420px;
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
 
-        .logo-area {
+        .header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .logo-area h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            color: var(--primary-color);
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.025em;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
-        .tabs {
-            display: none; /* Escondi as abas para usar o link de alternar */
+        .header p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             font-weight: 500;
+            margin-bottom: 0.5rem;
         }
 
-        .form-group input, .form-group select {
+        .form-group input {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            box-sizing: border-box;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .btn {
             width: 100%;
-            padding: 0.9rem;
-            border: none;
-            border-radius: var(--border-radius);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 1rem;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-google {
-            background-color: white;
-            color: #555;
-            border: 1px solid #ddd;
+            transition: all 0.2s;
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 0.8rem;
-            border-radius: var(--border-radius);
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            margin-top: 1rem;
+        }
+
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+
+        .error-msg {
+            background-color: #fef2f2;
+            color: var(--error);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
             margin-bottom: 1rem;
             display: none;
-            font-size: 0.9rem;
+            border: 1px solid #fee2e2;
         }
 
-        .switch-link {
+        .switch-text {
             text-align: center;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
         }
 
-        .switch-link a {
-            color: var(--primary-color);
+        .switch-text a {
+            color: var(--primary);
             text-decoration: none;
             font-weight: 600;
         }
@@ -130,154 +191,357 @@
             text-align: center;
         }
 
-        .user-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: var(--border-radius);
+        .user-card {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 12px;
             margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .user-card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .stats-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .stats-section h3 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .visitor-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8125rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px dotted var(--border);
+        }
+
+        .visitor-item:last-child {
+            border-bottom: none;
+        }
+
+        .total-visits {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-<div class="auth-container">
-    <div class="logo-area">
-        <h1>OLIVEIRA APPS</h1>
-    </div>
+    <div class="container">
+        <div id="loading" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
 
-    <div id="auth-forms">
-        <div id="error-display" class="error-message"></div>
+        <div class="header">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                Status: Online
+            </div>
+            <h1>Oliveira Apps</h1>
+            <p id="header-subtitle">Portal de Gestão e Download</p>
+        </div>
 
-        <!-- LOGIN FORM -->
+        <div id="error-box" class="error-msg"></div>
+
+        <!-- LOGIN SECTION -->
         <div id="login-section">
             <div class="form-group">
-                <label>E-mail ou Usuário</label>
-                <input type="text" id="login-id" placeholder="Digite seu e-mail">
+                <label>E-mail</label>
+                <input type="email" id="login-email" placeholder="seu@email.com">
             </div>
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" id="login-pass" placeholder="Sua senha">
+                <input type="password" id="login-password" placeholder="••••••••">
             </div>
-            <button class="btn btn-primary" onclick="handleAuth('login')">ENTRAR</button>
-            <div class="switch-link">Não tem uma conta? <a href="#" onclick="switchMode('register')">Cadastre-se</a></div>
+            <button class="btn btn-primary" onclick="handleAuth('login')">Entrar</button>
+            <div class="switch-text">
+                Não tem uma conta? <a href="#" onclick="toggleMode('register')">Criar conta</a>
+            </div>
         </div>
 
-        <!-- REGISTER FORM -->
+        <!-- REGISTER SECTION -->
         <div id="register-section" style="display: none;">
             <div class="form-group">
-                <label>Nome de usuário</label>
-                <input type="text" id="reg-username" placeholder="Escolha um nome">
+                <label>Nome Completo</label>
+                <input type="text" id="reg-name" placeholder="Seu nome">
             </div>
             <div class="form-group">
                 <label>E-mail</label>
                 <input type="email" id="reg-email" placeholder="seu@email.com">
             </div>
             <div class="form-group">
-                <label>Senha</label>
-                <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
+                <label>Senha (mín. 6 caracteres)</label>
+                <input type="password" id="reg-password" placeholder="••••••••">
             </div>
-            <div class="form-group">
-                <label>Digite novamente a senha</label>
-                <input type="password" id="reg-pass-confirm" placeholder="Confirme sua senha">
+            <button class="btn btn-primary" onclick="handleAuth('register')">Cadastrar Agora</button>
+            <div class="switch-text">
+                Já possui conta? <a href="#" onclick="toggleMode('login')">Fazer Login</a>
             </div>
-            <div class="form-group">
-                <label>Gênero</label>
-                <select id="reg-gender">
-                    <option value="">Selecione...</option>
-                    <option value="menino">Menino</option>
-                    <option value="menina">Menina</option>
-                </select>
+        </div>
+
+        <!-- DASHBOARD SECTION -->
+        <div id="dashboard">
+            <div class="user-card">
+                <h2>Olá, <span id="user-display-name">Usuário</span>!</h2>
+                <p id="user-display-email">carregando...</p>
             </div>
-            <button class="btn btn-primary" onclick="handleAuth('register')">CRIAR CONTA</button>
-            <div class="switch-link">Já tem conta? <a href="#" onclick="switchMode('login')">Fazer Login</a></div>
+            
+            <button class="btn btn-primary" onclick="downloadAPK()">
+                ⬇️ BAIXAR APK ATUALIZADO
+            </button>
+            
+            <button class="btn btn-outline" onclick="handleLogout()">Sair da Conta</button>
+
+            <div class="stats-section">
+                <h3>👥 Visitantes Recentes</h3>
+                <div id="recent-visitors">
+                    <div class="visitor-item"><span>Carregando...</span></div>
+                </div>
+                <div class="total-visits">
+                    Total de acessos: <span id="total-visits-count">0</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard">
-        <h2>ACESSO LIBERADO</h2>
-        <div class="user-info">
-            <p>Olá, <strong id="display-name">Usuário</strong>!</p>
-            <p id="display-email"></p>
-        </div>
-        <button class="btn btn-primary" onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR APK</button>
-        <button class="btn" onclick="logout()">SAIR</button>
-    </div>
-</div>
+    <script>
+        // CONFIGURAÇÕES SUPABASE
+        const SUPABASE_URL = 'https://xioxooqytfxsjdoqghdu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<script>
-    const SUPABASE_URL = 'https://xioxooqytfxsjdoqghdu.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // AUTO-LOGGING (SELF-HEALING)
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global Error Caught:", message);
+            supabaseClient.from('error_logs').insert([{
+                message: message,
+                source: source,
+                lineno: lineno,
+                colno: colno,
+                error_obj: error ? error.toString() : null,
+                user_agent: navigator.userAgent
+            }]).then(() => {});
+            return false;
+        };
 
-    function switchMode(mode) {
-        document.getElementById('login-section').style.display = mode === 'login' ? 'block' : 'none';
-        document.getElementById('register-section').style.display = mode === 'register' ? 'block' : 'none';
-        hideError();
-    }
-
-    function showError(msg) {
-        const errDiv = document.getElementById('error-display');
-        errDiv.innerText = msg;
-        errDiv.style.display = 'block';
-    }
-
-    function hideError() {
-        document.getElementById('error-display').style.display = 'none';
-    }
-
-    async function handleAuth(mode) {
-        hideError();
-        if (mode === 'register') {
-            const username = document.getElementById('reg-username').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const confirm = document.getElementById('reg-pass-confirm').value;
-            const gender = document.getElementById('reg-gender').value;
-
-            if (!username || !email || !pass || !confirm || !gender) return showError("Preencha tudo!");
-            if (pass !== confirm) return showError("As senhas não batem!");
-            if (pass.length < 6) return showError("Senha curta (mínimo 6)!");
-
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password: pass,
-                options: { data: { username, gender } }
-            });
-
-            if (error) showError(error.message);
-            else alert("Conta criada! Verifique seu e-mail.");
-
-        } else {
-            const id = document.getElementById('login-id').value;
-            const pass = document.getElementById('login-pass').value;
-            const { data, error } = await supabase.auth.signInWithPassword({ email: id, password: pass });
-            if (error) showError("Erro no login. Verifique os dados.");
+        // UI HELPERS
+        function toggleMode(mode) {
+            const login = document.getElementById('login-section');
+            const register = document.getElementById('register-section');
+            const subtitle = document.getElementById('header-subtitle');
+            
+            if (mode === 'register') {
+                login.style.display = 'none';
+                register.style.display = 'block';
+                subtitle.innerText = 'Crie sua conta gratuita';
+            } else {
+                login.style.display = 'block';
+                register.style.display = 'none';
+                subtitle.innerText = 'Portal de Gestão e Download';
+            }
+            hideError();
         }
-    }
 
-    async function loginWithGoogle() {
-        const { error } = await supabase.auth.signInWithOAuth({ 
-            provider: 'google',
-            options: { redirectTo: window.location.href }
+        function showError(msg) {
+            const box = document.getElementById('error-box');
+            box.innerText = msg;
+            box.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error-box').style.display = 'none';
+        }
+
+        function setLoader(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+
+        // AUTH LOGIC
+        async function handleAuth(mode) {
+            hideError();
+            setLoader(true);
+
+            try {
+                if (mode === 'register') {
+                    const name = document.getElementById('reg-name').value;
+                    const email = document.getElementById('reg-email').value;
+                    const pass = document.getElementById('reg-password').value;
+
+                    if (!name || !email || !pass) throw new Error("Preencha todos os campos.");
+                    if (pass.length < 6) throw new Error("A senha deve ter pelo menos 6 caracteres.");
+
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email,
+                        password: pass,
+                        options: { data: { full_name: name } }
+                    });
+
+                    if (error) throw error;
+                    alert("Conta criada! Verifique seu e-mail para confirmar (se necessário) ou faça login.");
+                    toggleMode('login');
+
+                } else {
+                    const email = document.getElementById('login-email').value;
+                    const pass = document.getElementById('login-password').value;
+
+                    if (!email || !pass) throw new Error("Informe e-mail e senha.");
+
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email,
+                        password: pass
+                    });
+
+                    if (error) throw error;
+                }
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                setLoader(false);
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        function downloadAPK() {
+            // URL direta do repositório/releases
+            window.location.href = 'https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest';
+        }
+
+        // TRACKING & STATS
+        async function trackVisit() {
+            try {
+                // Tenta incrementar o contador global
+                // Supabase rpc ou update
+                // Para simplificar e ser robusto, inserimos uma linha em 'site_visits'
+                // e contamos o total.
+                await supabaseClient.from('site_stats').insert([{ event: 'page_load' }]);
+            } catch (e) { console.warn("Stats error", e); }
+        }
+
+        async function logLogin(user) {
+            try {
+                const name = user.user_metadata.full_name || user.email;
+                await supabaseClient.from('site_stats').insert([{ 
+                    event: 'login', 
+                    username: name 
+                }]);
+                refreshStats();
+            } catch (e) { console.warn("Login log error", e); }
+        }
+
+        async function refreshStats() {
+            try {
+                // Busca total de visitas
+                const { count: total } = await supabaseClient
+                    .from('site_stats')
+                    .select('*', { count: 'exact', head: true });
+                
+                document.getElementById('total-visits-count').innerText = total || 0;
+
+                // Busca últimos 5 logins
+                const { data: recent } = await supabaseClient
+                    .from('site_stats')
+                    .select('username, created_at')
+                    .eq('event', 'login')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                const list = document.getElementById('recent-visitors');
+                if (recent && recent.length > 0) {
+                    list.innerHTML = recent.map(r => `
+                        <div class="visitor-item">
+                            <span>${r.username}</span>
+                            <span style="color: var(--text-muted)">${new Date(r.created_at).toLocaleDateString()}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div class="visitor-item">Nenhum login recente.</div>';
+                }
+            } catch (e) {
+                console.warn("Refresh stats error", e);
+                document.getElementById('recent-visitors').innerHTML = '<div class="visitor-item">Módulo de estatísticas offline.</div>';
+            }
+        }
+
+        // AUTH STATE OBSERVER
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            const loginSection = document.getElementById('login-section');
+            const registerSection = document.getElementById('register-section');
+            const dashboard = document.getElementById('dashboard');
+
+            if (session) {
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'none';
+                dashboard.style.display = 'block';
+                
+                const user = session.user;
+                document.getElementById('user-display-name').innerText = user.user_metadata.full_name || 'Usuário';
+                document.getElementById('user-display-email').innerText = user.email;
+                
+                if (event === 'SIGNED_IN') {
+                    logLogin(user);
+                } else {
+                    refreshStats();
+                }
+            } else {
+                dashboard.style.display = 'none';
+                toggleMode('login');
+            }
         });
-        if (error) showError(error.message);
-    }
 
-    async function logout() {
-        await supabase.auth.signOut();
-        location.reload();
-    }
+        // INITIALIZE
+        trackVisit();
+        refreshStats();
 
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            document.getElementById('auth-forms').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            const meta = session.user.user_metadata;
-            document.getElementById('display-name').innerText = meta.username || session.user.email;
-            document.getElementById('display-email').innerText = session.user.email;
-        }
-    });
-</script>
+    </script>
 </body>
 </html>
