@@ -6,9 +6,7 @@
     <title>Oliveira Apps | Portal de Acesso</title>
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -193,20 +191,12 @@
         <!-- LOGIN FORM -->
         <div id="login-section">
             <div class="form-group">
-                <label>Usuário ou E-mail</label>
-                <input type="text" id="login-id" placeholder="Ex: joao@email.com">
+                <label>E-mail</label>
+                <input type="email" id="login-id" placeholder="Ex: joao@email.com">
             </div>
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" id="login-pass" placeholder="Sua senha">
-            </div>
-            <div class="form-group">
-                <label>Gênero</label>
-                <select id="login-gender">
-                    <option value="">Selecione...</option>
-                    <option value="menino">Masculino (Menino)</option>
-                    <option value="menina">Feminino (Menina)</option>
-                </select>
             </div>
             <button class="btn btn-primary" onclick="handleAuth('login')">ENTRAR NO PORTAL</button>
         </div>
@@ -224,10 +214,6 @@
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
-            </div>
-            <div class="form-group">
-                <label>Confirmar Senha</label>
-                <input type="password" id="reg-pass-confirm" placeholder="Repita a senha">
             </div>
             <div class="form-group">
                 <label>Gênero</label>
@@ -265,20 +251,10 @@
 </div>
 
 <script>
-    // CONFIGURAÇÃO DO FIREBASE (Sera substituida)
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    // Inicializa Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // CONFIGURAÇÃO DO SUPABASE
+    const SUPABASE_URL = 'https://xioxooqytfxsjdoqghdu.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     function switchMode(mode) {
         document.getElementById('login-section').style.display = mode === 'login' ? 'block' : 'none';
@@ -298,89 +274,67 @@
         document.getElementById('error-display').style.display = 'none';
     }
 
-    function handleAuth(mode) {
+    async function handleAuth(mode) {
         hideError();
         if (mode === 'register') {
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
-            const confirm = document.getElementById('reg-pass-confirm').value;
             const gender = document.getElementById('reg-gender').value;
 
             if (!name || !email || !pass || !gender) return showError("Preencha todos os campos.");
-            if (pass !== confirm) return showError("As senhas não coincidem.");
             if (pass.length < 6) return showError("A senha deve ter pelo menos 6 caracteres.");
 
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return db.collection("users").doc(user.uid).set({
-                        name: name,
-                        email: email,
-                        gender: gender,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .catch(err => showError(translateError(err.code)));
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password: pass,
+                options: {
+                    data: { name, gender }
+                }
+            });
+
+            if (error) showError(error.message);
+            else alert("Cadastro realizado! Verifique seu e-mail (se necessário) ou faça login.");
 
         } else {
             const email = document.getElementById('login-id').value;
             const pass = document.getElementById('login-pass').value;
-            const gender = document.getElementById('login-gender').value;
 
-            if (!email || !pass || !gender) return showError("Preencha e-mail, senha e gênero.");
+            if (!email || !pass) return showError("Preencha e-mail e senha.");
 
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(err => showError(translateError(err.code)));
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password: pass
+            });
+
+            if (error) showError("E-mail ou senha incorretos.");
         }
     }
 
-    function loginWithGoogle() {
+    async function loginWithGoogle() {
         hideError();
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider)
-            .then((result) => {
-                const user = result.user;
-                // Salva ou atualiza no Firestore
-                db.collection("users").doc(user.uid).set({
-                    name: user.displayName,
-                    email: user.email,
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            })
-            .catch(err => showError(translateError(err.code)));
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.href
+            }
+        });
+        if (error) showError(error.message);
     }
 
-    function translateError(code) {
-        switch (code) {
-            case 'auth/user-not-found': return "Usuário não cadastrado.";
-            case 'auth/wrong-password': return "Senha incorreta.";
-            case 'auth/invalid-email': return "E-mail inválido.";
-            case 'auth/email-already-in-use': return "Este e-mail já está em uso.";
-            case 'auth/weak-password': return "A senha é muito fraca.";
-            case 'auth/popup-closed-by-user': return "A janela de login foi fechada.";
-            default: return "Erro ao processar. Tente novamente.";
-        }
-    }
-
-    function logout() {
-        auth.signOut();
+    async function logout() {
+        await supabase.auth.signOut();
+        location.reload();
     }
 
     // Monitor de estado
-    auth.onAuthStateChanged(user => {
-        if (user) {
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session && session.user) {
+            const user = session.user;
             document.getElementById('auth-forms').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('display-name').innerText = user.displayName || "Operador";
+            document.getElementById('display-name').innerText = user.user_metadata.name || user.email.split('@')[0];
             document.getElementById('display-email').innerText = user.email;
-            
-            // Busca dados extras se houver
-            db.collection("users").doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    document.getElementById('display-name').innerText = doc.data().name;
-                }
-            });
         } else {
             document.getElementById('auth-forms').style.display = 'block';
             document.getElementById('dashboard').style.display = 'none';
