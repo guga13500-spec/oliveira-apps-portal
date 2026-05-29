@@ -1,210 +1,55 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oliveira Apps | Portal Oficial</title>
-    <meta name="description" content="A central de aplicativos da Oliveira Apps. Baixe o Gravador Super v1.0 e participe da nossa comunidade.">
-    
-    <!-- Tailwind CSS para design moderno e responsivo -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Fontes e Ícones -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <title>Oliveira Apps Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .neon-border { border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); }
-        .tab-active { border-bottom: 2px solid #00e5ff; color: #00e5ff; }
-        .btn-primary { background: linear-gradient(135deg, #00e5ff 0%, #007bff 100%); transition: transform 0.2s; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 229, 255, 0.4); }
-        
-        /* Acessibilidade: Foco visível */
-        *:focus { outline: 2px solid #00e5ff; outline-offset: 4px; }
-        
-        /* Esconder abas inativas */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body { background: #0a0a0a; color: #00ff00; font-family: sans-serif; text-align: center; padding: 50px; }
+        .card { border: 1px solid #0f0; padding: 20px; margin: 20px auto; max-width: 400px; background: #111; }
+        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        input { display: block; width: 80%; margin: 10px auto; padding: 10px; background: #222; color: #0f0; border: 1px solid #0f0; }
     </style>
 </head>
 <body>
+    <h1>OLIVEIRA APPS - PORTAL 2026</h1>
+    <div id="auth-status">Conectando...</div>
+    
+    <div id="login-form" class="card">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+    </div>
 
-    <!-- Navegação -->
-    <nav class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center">
-                <i class="fas fa-cube text-white text-xl"></i>
-            </div>
-            <span class="text-xl font-bold tracking-tight">OLIVEIRA <span class="text-cyan-400">APPS</span></span>
-        </div>
-        
-        <div class="hidden md:flex gap-8 font-semibold">
-            <button   class="nav-link tab-active" id="link-home">Home</button>
-            <button   class="nav-link" id="link-apps">Aplicativos</button>
-            <button   class="nav-link" id="link-comunidade">Comunidade</button>
-        </div>
+    <div id="locked-content" class="card" style="display:none">
+        <h3>✅ Gravador Super v2 Pronto</h3>
+        <p>Acesse o repositório para baixar o APK do Build #94.</p>
+        <button onclick="window.location.href='https://github.com/guga13500-spec/oliveira-apps-portal'">Ir para Download</button>
+    </div>
 
-        <div class="flex gap-4">
-            <button   class="px-4 py-2 rounded-full border border-cyan-500/30 hover:bg-cyan-500/10 transition">Entrar</button>
-            <button   class="p-2 rounded-full bg-slate-800 text-yellow-400" aria-label="Alternar modo escuro">
-                <i class="fas fa-moon"></i>
-            </button>
-        </div>
-    </nav>
-
-    <!-- Conteúdo Principal -->
-    <main class="max-w-6xl mx-auto p-6 mt-8">
-
-        <!-- ABA HOME -->
-        <section id="home" class="tab-content active text-center py-20">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-                Tecnologia que <span class="text-cyan-400">trabalha para você.</span>
-            </h1>
-            <p class="text-slate-400 text-xl mb-10 max-w-2xl mx-auto">
-                A Oliveira Apps desenvolve ferramentas inteligentes, acessíveis e focadas em produtividade. Conheça nossa nova geração de aplicativos.
-            </p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <button   class="btn-primary px-8 py-4 rounded-xl font-bold text-lg">Explorar Apps</button>
-                <button   class="bg-slate-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-700 transition">Entrar no Fórum</button>
-            </div>
-        </section>
-
-        <!-- ABA APLICATIVOS -->
-        <section id="apps" class="tab-content py-10">
-            <h2 class="text-3xl font-bold mb-8">Nossa Loja</h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                
-                <!-- CARD GRAVADOR SUPER -->
-                <div class="glass p-6 rounded-2xl neon-border flex flex-col gap-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
-                        <i class="fas fa-microphone-alt"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-bold">Gravador Super</h3>
-                        <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded">Versão 1.0 Final</span>
-                    </div>
-                    <p class="text-slate-400 text-sm">
-                        O gravador de áudio mais estável e potente para Android. Com sistema de bypass de pastas e interface fluida.
-                    </p>
-                    <ul class="text-xs text-slate-300 space-y-2 my-2">
-                        <li><i class="fas fa-check text-cyan-400 mr-2"></i> Gravação em Segundo Plano</li>
-                        <li><i class="fas fa-check text-cyan-400 mr-2"></i> Estabilidade Blindada</li>
-                        <li><i class="fas fa-check text-cyan-400 mr-2"></i> Design em Abas (ViewPager)</li>
-                    </ul>
-                    <a href="https://github.com/miolanatan9-debug/gravador-super-v2-final/actions/runs/26612554232" class="btn-primary w-full py-3 rounded-xl font-bold text-center mt-auto">
-                        <i class="fas fa-download mr-2"></i> Baixar APK (25.7 MB)
-                    </a>
-                    <p class="text-[10px] text-center text-slate-500 mt-2">Compatível com Android 8.0+</p>
-                </div>
-
-                <!-- PLACEHOLDER PARA PRÓXIMO APP -->
-                <div class="glass p-6 rounded-2xl border border-dashed border-slate-700 flex flex-center flex-col justify-center text-center opacity-50">
-                    <i class="fas fa-plus-circle text-4xl mb-4 text-slate-600"></i>
-                    <p class="font-bold text-slate-500">Novo App em Breve</p>
-                    <p class="text-xs text-slate-600">O enxame de robôs está trabalhando...</p>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ABA COMUNIDADE -->
-        <section id="comunidade" class="tab-content py-10">
-            <div class="grid md:grid-cols-4 gap-6">
-                <!-- Sidebar do Fórum -->
-                <div class="md:col-span-1 glass p-4 rounded-xl flex flex-col gap-2">
-                    <h3 class="font-bold mb-4 uppercase text-xs tracking-widest text-slate-500">Canais</h3>
-                    <button class="text-left p-2 rounded bg-cyan-500/10 text-cyan-400 font-semibold">#geral</button>
-                    <button class="text-left p-2 rounded hover:bg-slate-800 transition">#suporte-tecnico</button>
-                    <button class="text-left p-2 rounded hover:bg-slate-800 transition">#sugestoes</button>
-                    <button class="text-left p-2 rounded hover:bg-slate-800 transition">#off-topic</button>
-                </div>
-                
-                <!-- Chat/Fórum -->
-                <div class="md:col-span-3 glass rounded-xl flex flex-col h-[600px]">
-                    <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                        <span class="font-bold text-cyan-400">#geral</span>
-                        <span class="text-xs text-slate-500">12 usuários online</span>
-                    </div>
-                    <div class="flex-1 p-4 overflow-y-auto space-y-4" id="chat-messages">
-                        <div class="flex gap-3">
-                            <div class="w-8 h-8 rounded bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs font-bold">G</div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-300">Guga <span class="text-[10px] font-normal text-slate-500 ml-2">Hoje às 08:05</span></p>
-                                <p class="text-sm bg-slate-800 p-2 rounded-lg mt-1 inline-block">Bem-vindos à Oliveira Apps! O site está ficando top! 🚀</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-3">
-                            <div class="w-8 h-8 rounded bg-cyan-500 flex-shrink-0 flex items-center justify-center text-xs font-bold">Z</div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-300">Zapia Assistant <span class="text-[10px] font-normal text-slate-500 ml-2">Hoje às 08:06</span></p>
-                                <p class="text-sm bg-slate-800 p-2 rounded-lg mt-1 inline-block">O enxame de robôs está pronto para ajudar a comunidade.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 border-t border-white/10">
-                        <div class="flex gap-2">
-                            <input type="text" placeholder="Digite sua mensagem no #geral..." class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-4 py-2 focus:border-cyan-500 focus:ring-0">
-                            <button class="bg-cyan-600 px-4 py-2 rounded-lg font-bold hover:bg-cyan-500"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                        <p class="text-[10px] text-slate-500 mt-2 text-center">Para enviar mensagens reais, faça login na sua conta Oliveira Apps.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA LOGIN -->
-        <section id="login" class="tab-content py-20">
-            <div class="max-w-md mx-auto glass p-8 rounded-3xl neon-border">
-                <h2 class="text-3xl font-bold mb-2 text-center">Acesse o Portal</h2>
-                <p class="text-slate-400 text-center mb-8 text-sm">Entre com sua conta Oliveira Apps para baixar betas e usar o fórum.</p>
-                
-                <form class="space-y-4" onsubmit="return false">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">E-mail</label>
-                        <input type="email" placeholder="seu@email.com" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 focus:border-cyan-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Senha</label>
-                        <input type="password" placeholder="••••••••" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 focus:border-cyan-500">
-                    </div>
-                    <button class="btn-primary w-full py-4 rounded-xl font-bold text-lg mt-4">Entrar Agora</button>
-                </form>
-                
-                <div class="mt-8 pt-8 border-t border-white/5 flex flex-col gap-3">
-                    <button class="flex items-center justify-center gap-3 w-full bg-white text-slate-900 py-3 rounded-xl font-bold hover:bg-slate-200 transition">
-                        <i class="fab fa-google"></i> Continuar com Google
-                    </button>
-                    <p class="text-center text-sm text-slate-500 mt-4">Não tem conta? <a href="#" class="text-cyan-400 font-bold">Criar uma agora</a></p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Rodapé -->
-    <footer class="mt-20 py-10 border-t border-white/5 bg-slate-950">
-        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="text-center md:text-left">
-                <p class="text-xl font-bold tracking-tight">OLIVEIRA <span class="text-cyan-400">APPS</span></p>
-                <p class="text-xs text-slate-500 mt-1">© 2026 Todos os direitos reservados. Sinceridade Absoluta.</p>
-            </div>
-            <div class="flex gap-6 text-slate-500 text-sm">
-                <a href="#" class="hover:text-cyan-400">Termos de Uso</a>
-                <a href="#" class="hover:text-cyan-400">Privacidade</a>
-                <a href="#" class="hover:text-cyan-400">Suporte</a>
-            </div>
-            <div class="flex gap-4 text-xl text-slate-400">
-                <i class="fab fa-github hover:text-white cursor-pointer"></i>
-                <i class="fab fa-instagram hover:text-white cursor-pointer"></i>
-                <i class="fab fa-twitter hover:text-white cursor-pointer"></i>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Lógica de Navegação e Interatividade -->
+    <script>
+        const supabaseClient = supabase.createClient('https://xioxooqytfxsjdoqghdu.supabase.co', 'sb_publishable_CAJTTExGFYQIzmNlF6N1Xw_QKqOBUFA');
+        async function check() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const status = document.getElementById('auth-status');
+            const form = document.getElementById('login-form');
+            const content = document.getElementById('locked-content');
+            if (user) {
+                status.innerText = "Olá, " + user.email;
+                form.style.display = 'none';
+                content.style.display = 'block';
+            } else {
+                status.innerText = "Faça login para acessar os apps";
+            }
+        }
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+            else check();
+        }
+        window.onload = check;
+    </script>
 </body>
 </html>
