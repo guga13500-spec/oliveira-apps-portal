@@ -3,267 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oliveira Apps | Portal Oficial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Oliveira Apps | Portal de Acesso</title>
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
-            --primary: #00ff00;
-            --bg: #0a0a0a;
-            --card-bg: #151515;
-            --text: #ffffff;
-            --error: #ff4444;
+            --primary-color: #0066cc;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --border-radius: 8px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
         body {
-            background-color: var(--bg);
-            color: var(--text);
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            color: var(--text-color);
         }
 
-        .container {
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 400px;
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
+            max-width: 450px;
         }
 
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
-            color: var(--primary);
+        .logo-area {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-area h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .tabs {
             display: flex;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #333;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 1.5rem;
         }
 
         .tab {
             flex: 1;
-            padding: 12px;
+            text-align: center;
+            padding: 0.8rem;
             cursor: pointer;
-            color: #888;
-            transition: 0.3s;
             font-weight: 600;
+            color: #666;
+            transition: 0.3s;
         }
 
         .tab.active {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
         }
 
         .form-group {
-            text-align: left;
-            margin-bottom: 20px;
+            margin-bottom: 1rem;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #aaa;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
-        input {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 12px;
-            background: #222;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #fff;
-            outline: none;
-            transition: 0.3s;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
         }
 
-        input:focus {
-            border-color: var(--primary);
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(0,102,204,0.2);
         }
 
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 0.9rem;
             border: none;
-            border-radius: 6px;
-            font-weight: 700;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
-            text-transform: uppercase;
-            margin-top: 10px;
+            margin-bottom: 1rem;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: #000;
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,255,0,0.3);
+            background-color: #0052a3;
         }
 
         .btn-google {
-            background: #fff;
-            color: #000;
+            background-color: white;
+            color: #555;
+            border: 1px solid #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-top: 20px;
         }
 
-        .error-msg {
-            color: var(--error);
-            font-size: 13px;
-            margin-top: 5px;
+        .btn-google:hover {
+            background-color: #f1f1f1;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
             display: none;
-            height: 16px;
+            font-size: 0.9rem;
         }
 
-        #logged-in-area {
+        .status-message {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        /* Dash Area */
+        #dashboard {
             display: none;
+            text-align: center;
         }
 
-        .welcome-card {
-            background: #111;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            margin-top: 20px;
+        .user-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
         }
 
         .footer {
-            margin-top: 40px;
-            font-size: 12px;
-            color: #555;
-            letter-spacing: 2px;
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <div class="container" id="auth-area">
+<div class="auth-container">
+    <div class="logo-area">
         <h1>OLIVEIRA APPS</h1>
-        
+    </div>
+
+    <div id="auth-forms">
         <div class="tabs">
-            <div class="tab active" id="login-tab" onclick="switchTab('login')">LOGIN</div>
-            <div class="tab" id="register-tab" onclick="switchTab('register')">CADASTRO</div>
+            <div class="tab active" id="tab-login" onclick="switchMode('login')">LOGIN</div>
+            <div class="tab" id="tab-register" onclick="switchMode('register')">CADASTRO</div>
         </div>
 
+        <div id="error-display" class="error-message"></div>
+
         <!-- LOGIN FORM -->
-        <div id="login-form">
+        <div id="login-section">
             <div class="form-group">
-                <label>E-mail</label>
-                <input type="email" id="login-email" placeholder="Seu e-mail">
-                <div class="error-msg" id="login-email-error"></div>
+                <label>Usuário ou E-mail</label>
+                <input type="text" id="login-id" placeholder="Ex: joao@email.com">
             </div>
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" id="login-pass" placeholder="Sua senha">
-                <div class="error-msg" id="login-pass-error"></div>
             </div>
-            <button class="btn btn-primary" onclick="handleLogin()">ENTRAR</button>
+            <div class="form-group">
+                <label>Gênero</label>
+                <select id="login-gender">
+                    <option value="">Selecione...</option>
+                    <option value="menino">Masculino (Menino)</option>
+                    <option value="menina">Feminino (Menina)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="handleAuth('login')">ENTRAR NO PORTAL</button>
         </div>
 
         <!-- REGISTER FORM -->
-        <div id="register-form" style="display: none;">
+        <div id="register-section" style="display: none;">
+            <div class="form-group">
+                <label>Nome completo</label>
+                <input type="text" id="reg-name" placeholder="Como quer ser chamado?">
+            </div>
             <div class="form-group">
                 <label>E-mail</label>
-                <input type="email" id="reg-email" placeholder="Seu e-mail">
-                <div class="error-msg" id="reg-email-error"></div>
+                <input type="email" id="reg-email" placeholder="seu@email.com">
             </div>
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres">
-                <div class="error-msg" id="reg-pass-error"></div>
+                <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
             </div>
-            <button class="btn btn-primary" onclick="handleRegister()">CRIAR CONTA</button>
+            <div class="form-group">
+                <label>Confirmar Senha</label>
+                <input type="password" id="reg-pass-confirm" placeholder="Repita a senha">
+            </div>
+            <div class="form-group">
+                <label>Gênero</label>
+                <select id="reg-gender">
+                    <option value="">Selecione...</option>
+                    <option value="menino">Masculino (Menino)</option>
+                    <option value="menina">Feminino (Menina)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="handleAuth('register')">CRIAR MINHA CONTA</button>
         </div>
 
-        <button class="btn btn-google" onclick="handleGoogleLogin()">
-            <img src="https://www.google.com/favicon.ico" width="18">
-            ENTRAR COM GOOGLE
+        <div style="text-align: center; margin: 1rem 0; color: #999; font-size: 0.9rem;">OU</div>
+
+        <button class="btn btn-google" onclick="loginWithGoogle()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+            ENTRAR RÁPIDO COM GOOGLE
         </button>
+
+        <p class="status-message" id="status-text">Status: Sistema Online</p>
     </div>
 
-    <div class="container" id="logged-in-area">
-        <h1>BEM-VINDO</h1>
-        <div class="welcome-card">
-            <p id="user-display">Operador conectado</p>
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard">
+        <h2>ACESSO LIBERADO</h2>
+        <div class="user-info">
+            <p>Olá, <strong id="display-name">Usuário</strong>!</p>
+            <p id="display-email" style="font-size: 0.9rem; color: #666;"></p>
         </div>
-        <button class="btn btn-primary" style="margin-top: 30px;" onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR GRAVADOR SUPER V2</button>
-        <button class="btn" style="background:#333; color:#fff; margin-top:15px;" onclick="handleLogout()">SAIR</button>
+        <button class="btn btn-primary" onclick="window.location.href='https://github.com/miolanatan9-debug/gravador-super-v2-final/releases/latest'">BAIXAR GRAVADOR SUPER V2</button>
+        <button class="btn" style="background: #eee;" onclick="logout()">SAIR DO SISTEMA</button>
     </div>
 
-    <div class="footer">SINCERIDADE ABSOLUTA</div>
+    <div class="footer">Oliveira Apps &copy; 2026 - Sinceridade Absoluta</div>
+</div>
 
-    <script>
-        // CONFIGURAÇÃO FIREBASE (Drop keys here)
-        // const firebaseConfig = { ... };
-        
-        function switchTab(type) {
-            document.getElementById('login-tab').classList.toggle('active', type === 'login');
-            document.getElementById('register-tab').classList.toggle('active', type === 'register');
-            document.getElementById('login-form').style.display = type === 'login' ? 'block' : 'none';
-            document.getElementById('register-form').style.display = type === 'register' ? 'block' : 'none';
-            clearErrors();
-        }
+<script>
+    // CONFIGURAÇÃO DO FIREBASE (Sera substituida)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-        function clearErrors() {
-            document.querySelectorAll('.error-msg').forEach(e => e.style.display = 'none');
-        }
+    // Inicializa Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-        function showError(id, msg) {
-            const el = document.getElementById(id);
-            el.innerText = msg;
-            el.style.display = 'block';
-        }
+    function switchMode(mode) {
+        document.getElementById('login-section').style.display = mode === 'login' ? 'block' : 'none';
+        document.getElementById('register-section').style.display = mode === 'register' ? 'block' : 'none';
+        document.getElementById('tab-login').className = mode === 'login' ? 'tab active' : 'tab';
+        document.getElementById('tab-register').className = mode === 'register' ? 'tab active' : 'tab';
+        hideError();
+    }
 
-        async function handleLogin() {
-            clearErrors();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            
-            if(!email) return showError('login-email-error', 'E-mail obrigatório');
-            if(!pass) return showError('login-pass-error', 'Senha obrigatória');
+    function showError(msg) {
+        const errDiv = document.getElementById('error-display');
+        errDiv.innerText = msg;
+        errDiv.style.display = 'block';
+    }
 
-            // Aqui entra a chamada real do Firebase (signInWithEmailAndPassword)
-            // Por enquanto, simulamos o erro se não houver config
-            console.log("Tentando login online...");
-            alert("SISTEMA ONLINE EM CONFIGURAÇÃO. Conectando ao Firebase...");
-        }
+    function hideError() {
+        document.getElementById('error-display').style.display = 'none';
+    }
 
-        async function handleRegister() {
-            clearErrors();
+    function handleAuth(mode) {
+        hideError();
+        if (mode === 'register') {
+            const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
+            const confirm = document.getElementById('reg-pass-confirm').value;
+            const gender = document.getElementById('reg-gender').value;
 
-            if(!email) return showError('reg-email-error', 'E-mail obrigatório');
-            if(pass.length < 8) return showError('reg-pass-error', 'Senha deve ter 8+ caracteres');
+            if (!name || !email || !pass || !gender) return showError("Preencha todos os campos.");
+            if (pass !== confirm) return showError("As senhas não coincidem.");
+            if (pass.length < 6) return showError("A senha deve ter pelo menos 6 caracteres.");
 
-            alert("CRIANDO CONTA ONLINE... Aguarde conexão Firebase.");
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return db.collection("users").doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        gender: gender,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .catch(err => showError(translateError(err.code)));
+
+        } else {
+            const email = document.getElementById('login-id').value;
+            const pass = document.getElementById('login-pass').value;
+            const gender = document.getElementById('login-gender').value;
+
+            if (!email || !pass || !gender) return showError("Preencha e-mail, senha e gênero.");
+
+            auth.signInWithEmailAndPassword(email, pass)
+                .catch(err => showError(translateError(err.code)));
         }
+    }
 
-        async function handleGoogleLogin() {
-            // Aqui entra a chamada real (signInWithPopup)
-            alert("SOLICITANDO LOGIN GOOGLE... Selecione sua conta na janela que abrir.");
-        }
+    function loginWithGoogle() {
+        hideError();
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider)
+            .then((result) => {
+                const user = result.user;
+                // Salva ou atualiza no Firestore
+                db.collection("users").doc(user.uid).set({
+                    name: user.displayName,
+                    email: user.email,
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            })
+            .catch(err => showError(translateError(err.code)));
+    }
 
-        function handleLogout() {
-            location.reload();
+    function translateError(code) {
+        switch (code) {
+            case 'auth/user-not-found': return "Usuário não cadastrado.";
+            case 'auth/wrong-password': return "Senha incorreta.";
+            case 'auth/invalid-email': return "E-mail inválido.";
+            case 'auth/email-already-in-use': return "Este e-mail já está em uso.";
+            case 'auth/weak-password': return "A senha é muito fraca.";
+            case 'auth/popup-closed-by-user': return "A janela de login foi fechada.";
+            default: return "Erro ao processar. Tente novamente.";
         }
-    </script>
+    }
+
+    function logout() {
+        auth.signOut();
+    }
+
+    // Monitor de estado
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('auth-forms').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('display-name').innerText = user.displayName || "Operador";
+            document.getElementById('display-email').innerText = user.email;
+            
+            // Busca dados extras se houver
+            db.collection("users").doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    document.getElementById('display-name').innerText = doc.data().name;
+                }
+            });
+        } else {
+            document.getElementById('auth-forms').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+    });
+
+    // Detecta offline
+    window.addEventListener('offline', () => {
+        document.getElementById('status-text').innerText = "Status: Sem conexão (Offline)";
+        document.getElementById('status-text').style.color = "red";
+    });
+    window.addEventListener('online', () => {
+        document.getElementById('status-text').innerText = "Status: Sistema Online";
+        document.getElementById('status-text').style.color = "#666";
+    });
+</script>
+
 </body>
 </html>
